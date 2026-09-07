@@ -1,0 +1,11 @@
+[project]
+name = "counselor-search-agent"
+version = "0.1.0"
+description = "Counselor search AI agent for AgentCore Runtime"
+requires-python = ">=3.10"
+dependencies = [
+    "boto3>=1.28.0",
+    "strands-agents>=0.1.0",
+    "strands-agents-tools>=0.1.0",
+    "bedrock-agentcore>=0.1.0",
+]

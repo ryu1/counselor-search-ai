@@ -1,0 +1,34 @@
+{
+  "name": "CounselorSearchAI",
+  "version": 1,
+  "runtimes": [
+    {
+      "name": "counselor_search_agent",
+      "description": "Counselor search AI agent",
+      "build": "CodeZip",
+      "entrypoint": "app.py:main",
+      "codeLocation": "app",
+      "runtimeVersion": "PYTHON_3_11",
+      "networkMode": "PUBLIC",
+      "instrumentation": {
+        "enableOtel": false
+      },
+      "envVars": [
+        {
+          "name": "LAMBDA_FUNCTION_NAME",
+          "value": "search_counselors"
+        }
+      ]
+    }
+  ],
+  "memories": [],
+  "knowledgeBases": [],
+  "credentials": [],
+  "evaluators": [],
+  "onlineEvalConfigs": [],
+  "agentCoreGateways": [],
+  "policyEngines": [],
+  "configBundles": [],
+  "abTests": [],
+  "harnesses": []
+}
