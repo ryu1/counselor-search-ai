@@ -8,23 +8,12 @@ type Message = {
   timestamp: string
 }
 
-type SearchResult = {
-  office_id: string
-  office_name: string
-  nearest_stations: string
-  method: string
-  gender: string
-  age: string
-  expertise: string
-}
-
 export const useChatStore = defineStore('chat', () => {
   const messages = ref<Message[]>([])
   const isSearching = ref(false)
-  const currentResults = ref<SearchResult[]>([])
   const error = ref<string | null>(null)
 
-  const addMessage = (role: string, content: string) => {
+  const addMessage = (role: 'user' | 'assistant', content: string) => {
     messages.value.push({
       id: Date.now(),
       role,
@@ -32,10 +21,12 @@ export const useChatStore = defineStore('chat', () => {
       timestamp: new Date().toISOString(),
     })
     // Auto-scroll to bottom
-    const chatHistory = document.getElementById('chat-history') as HTMLElement
-    if (chatHistory) {
-      chatHistory.scrollIntoView({ behavior: 'smooth' })
-    }
+    setTimeout(() => {
+      const chatHistory = document.getElementById('chat-history') as HTMLElement
+      if (chatHistory) {
+        chatHistory.scrollTop = chatHistory.scrollHeight
+      }
+    }, 100)
   }
 
   const API_URL = import.meta.env.VITE_API_URL || '/api/search'
@@ -64,10 +55,6 @@ export const useChatStore = defineStore('chat', () => {
       if (result.result?.answer) {
         addMessage('assistant', result.result.answer)
       }
-
-      if (result.result?.results) {
-        currentResults.value = result.result.results
-      }
     } catch (err) {
       console.error('Search error:', err)
       error.value = err instanceof Error ? err.message : 'An error occurred'
@@ -77,10 +64,10 @@ export const useChatStore = defineStore('chat', () => {
     }
   }
 
-  const clearResults = () => {
-    currentResults.value = []
+  const clearChat = () => {
+    messages.value = []
     error.value = null
   }
 
-  return { messages, isSearching, currentResults, error, addMessage, sendSearch, clearResults }
+  return { messages, isSearching, error, addMessage, sendSearch, clearChat }
 })

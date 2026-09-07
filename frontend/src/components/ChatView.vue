@@ -1,6 +1,10 @@
 <template>
   <div class="chat-view">
     <section class="chat-history" id="chat-history">
+      <div v-if="messages.length === 0" class="welcome-message">
+        <p>カウンセラー検索AIへようこそ！</p>
+        <p>まずは、どんなお悩みでご相談されたいですか？</p>
+      </div>
       <div v-for="message in messages" :key="message.id" class="message-bubble">
         <MessageBubble :message="message"/>
       </div>
@@ -19,9 +23,6 @@ import InputArea from '@/components/InputArea.vue'
 const chatStore = useChatStore()
 
 const messages = computed(() => chatStore.messages)
-const isSearching = computed(() => chatStore.isSearching)
-const currentResults = computed(() => chatStore.currentResults)
-const error = computed(() => chatStore.error)
 
 const handleSubmit = async (text: string) => {
   await chatStore.sendSearch(text)
@@ -34,6 +35,8 @@ const handleSubmit = async (text: string) => {
   display: flex;
   flex-direction: column;
   background-color: #0f0f23;
+  border-radius: 12px;
+  overflow: hidden;
 }
 
 .chat-history {
@@ -41,6 +44,17 @@ const handleSubmit = async (text: string) => {
   padding: 1rem;
   overflow-y: auto;
   color: #f1f1f1;
+}
+
+.welcome-message {
+  text-align: center;
+  padding: 2rem;
+  color: #9ca3af;
+}
+
+.welcome-message p:first-child {
+  font-size: 1.25rem;
+  margin-bottom: 0.5rem;
 }
 
 .message-bubble {

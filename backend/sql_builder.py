@@ -26,8 +26,8 @@ def build_search_sql(conditions: dict[str, Any]) -> str:
     # 1. 駅検索 → offices テーブル
     stations = conditions.get("stations", [])
     if stations:
-        # 「ほか」は全駅マッチ（フィルタなし）
-        if "ほか" not in stations:
+        # 「ほか」または「指定なし」は全駅マッチ（フィルタなし）
+        if "ほか" not in stations and "指定なし" not in stations:
             station_conditions = []
             for s in stations:
                 s_escaped = escape_sql(s)
@@ -37,8 +37,8 @@ def build_search_sql(conditions: dict[str, Any]) -> str:
     # 2. 専門領域検索 → counselors テーブル
     expertise = conditions.get("area_of_expertise", [])
     if expertise:
-        # 「ほか」は全領域マッチ（フィルタなし）
-        if "ほか" not in expertise:
+        # 「ほか」または「指定なし」は全領域マッチ（フィルタなし）
+        if "ほか" not in expertise and "指定なし" not in expertise:
             expertise_conditions = []
             for e in expertise:
                 e_escaped = escape_sql(e)
@@ -48,8 +48,8 @@ def build_search_sql(conditions: dict[str, Any]) -> str:
     # 3. カウンセリング方法検索 → counselors テーブル
     methods = conditions.get("methods", [])
     if methods:
-        # 「ほか」は全方法マッチ（フィルタなし）
-        if "ほか" not in methods:
+        # 「ほか」または「指定なし」は全方法マッチ（フィルタなし）
+        if "ほか" not in methods and "指定なし" not in methods:
             method_conditions = []
             for m in methods:
                 m_escaped = escape_sql(m)
@@ -59,14 +59,18 @@ def build_search_sql(conditions: dict[str, Any]) -> str:
     # 4. 性別検索 → counselors テーブル
     genders = conditions.get("genders", [])
     if genders:
-        gender_items = ", ".join(["'" + g + "'" for g in genders])
-        counselor_clauses.append("c.gender IN (" + gender_items + ")")
+        # 「指定なし」は全性別マッチ（フィルタなし）
+        if "指定なし" not in genders:
+            gender_items = ", ".join(["'" + g + "'" for g in genders])
+            counselor_clauses.append("c.gender IN (" + gender_items + ")")
 
     # 5. 年代検索 → counselors テーブル
     ages = conditions.get("ages", [])
     if ages:
-        age_items = ", ".join(["'" + a + "'" for a in ages])
-        counselor_clauses.append("c.age IN (" + age_items + ")")
+        # 「指定なし」は全年代マッチ（フィルタなし）
+        if "指定なし" not in ages:
+            age_items = ", ".join(["'" + a + "'" for a in ages])
+            counselor_clauses.append("c.age IN (" + age_items + ")")
 
     # WHERE 句の組み立て
     all_clauses = office_clauses + counselor_clauses

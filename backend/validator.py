@@ -12,21 +12,21 @@ from typing import Any
 MASTER_STATIONS = frozenset([
     "新宿駅", "立川駅", "池袋駅", "渋谷駅", "品川駅", "東京駅",
     "秋葉原駅", "中野駅", "吉祥寺駅", "水道橋駅", "溜池山王駅",
-    "新橋駅", "ほか",
+    "新橋駅", "ほか", "指定なし",
 ])
 
 MASTER_EXPERTISE = frozenset([
     "うつ", "不安", "人間関係", "ストレス", "依存", "家族",
     "仕事", "子育て", "デート", "結婚", "離婚", "介護",
     "心身の調子", "パニック", "PTSD", "摂食障害", "むけ",
-    "コミュニケーション", "キャリア", "ほか",
+    "コミュニケーション", "キャリア", "ほか", "指定なし",
 ])
 
-MASTER_METHODS = frozenset(["オンライン", "対面", "電話", "メール"])
+MASTER_METHODS = frozenset(["オンライン", "対面", "電話", "メール", "指定なし"])
 
-MASTER_GENDERS = frozenset(["男性", "女性"])
+MASTER_GENDERS = frozenset(["男性", "女性", "指定なし"])
 
-MASTER_AGES = frozenset(["20代", "30代", "40代", "50代", "60代以上"])
+MASTER_AGES = frozenset(["20代", "30代", "40代", "50代", "60代以上", "指定なし"])
 
 
 def escape_sql(value: str) -> str:
@@ -80,10 +80,8 @@ def validate_conditions(conditions: dict[str, Any]) -> list[str]:
             invalid_fields.append("ages")
             break
 
-    # requested_datetime: only check that it exists, not the format
-    # (format normalization is handled separately in condition extraction)
-    if "requested_datetime" not in conditions:
-        invalid_fields.append("requested_datetime")
+    # requested_datetime is optional - only validate format if present
+    # No validation needed here as datetime normalization is handled separately
 
     return invalid_fields
 
