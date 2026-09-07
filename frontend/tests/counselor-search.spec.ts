@@ -12,7 +12,7 @@ test.describe('カウンセラー検索 AI デモ', () => {
   test('チャット入力フォームが表示される', async ({ page }) => {
     await page.goto(BASE);
     await expect(page.locator('textarea')).toBeVisible();
-    await expect(page.locator('button')).toContainText('検索実行');
+    await expect(page.locator('button')).toContainText('送信');
   });
 
   test('メッセージを送信できる', async ({ page }) => {
