@@ -4,6 +4,7 @@
 [![Vue.js](https://img.shields.io/badge/Vue.js-3-green?logo=vue.js&logoColor=white)](https://vuejs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![AWS](https://img.shields.io/badge/AWS-Lambda%20%7C%20Athena%20%7C%20Bedrock-orange?logo=amazon-aws&logoColor=white)](https://aws.amazon.com/)
+[![AgentCore](https://img.shields.io/badge/AgentCore-Runtime-purple?logo=amazon-aws&logoColor=white)](https://aws.amazon.com/bedrock/agentcore/)
 
 > 自然言語で相談希望を入力するだけで、AIが条件を理解し、カウンセリングオフィスを検索・提示するデモシステム
 
