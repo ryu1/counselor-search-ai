@@ -129,7 +129,7 @@ async def invoke(payload, context):
         memory_id=MEMORY_ID,
         session_id=session_id,
         actor_id=actor_id,
-        batch_size=1,
+        batch_size=10,
     )
 
     with AgentCoreMemorySessionManager(config, region_name="ap-northeast-1") as session_manager:
