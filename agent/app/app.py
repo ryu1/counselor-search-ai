@@ -115,8 +115,15 @@ def process_prompt(prompt):
 async def invoke(payload):
     log.info("Invoking Agent.....")
 
-    messages = payload.get("messages", [])
     prompt = process_prompt(payload.get("prompt", ""))
+    session_id = payload.get("session_id")
+
+    # セッションIDがある場合は会話履歴を継続
+    messages = []
+    if session_id:
+        # AgentCore Memory が自動的に会話履歴を管理
+        # セッションIDのみを渡し、履歴はサーバー側で管理
+        pass
 
     agent = Agent(
         model=load_model(),

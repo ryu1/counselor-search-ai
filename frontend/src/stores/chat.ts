@@ -12,6 +12,7 @@ export const useChatStore = defineStore('chat', () => {
   const messages = ref<Message[]>([])
   const isSearching = ref(false)
   const error = ref<string | null>(null)
+  const sessionId = ref<string | null>(null)
 
   const addMessage = (role: 'user' | 'assistant', content: string) => {
     messages.value.push({
@@ -37,12 +38,6 @@ export const useChatStore = defineStore('chat', () => {
     addMessage('user', text)
 
     try {
-      // 会話履歴を含めて送信
-      const conversationHistory = messages.value.map(msg => ({
-        role: msg.role,
-        content: msg.content,
-      }))
-
       const response = await fetch(API_URL, {
         method: 'POST',
         headers: {
@@ -50,7 +45,7 @@ export const useChatStore = defineStore('chat', () => {
         },
         body: JSON.stringify({
           query: text,
-          messages: conversationHistory,
+          session_id: sessionId.value,
         }),
       })
 
@@ -60,6 +55,11 @@ export const useChatStore = defineStore('chat', () => {
       }
 
       const result = await response.json()
+
+      // Session ID を保存
+      if (result.session_id) {
+        sessionId.value = result.session_id
+      }
 
       if (result.result?.answer) {
         addMessage('assistant', result.result.answer)
@@ -76,7 +76,8 @@ export const useChatStore = defineStore('chat', () => {
   const clearChat = () => {
     messages.value = []
     error.value = null
+    sessionId.value = null
   }
 
-  return { messages, isSearching, error, addMessage, sendSearch, clearChat }
+  return { messages, isSearching, error, sessionId, addMessage, sendSearch, clearChat }
 })
