@@ -42,6 +42,29 @@
 3. **コミット前** — 同一コミットにコードとドキュメントが含まれているか確認
 4. **コミット時** — 「コード変更 + ドキュメント更新」を1つのコミットメッセージに記載
 
+### コミットメッセージ
+
+Conventional Commits 形式を遵守する。詳細は `docs/conventions.md` を参照。
+
+```
+<type>(<scope>): <subject>
+```
+
+| type | 用途 |
+|------|------|
+| feat | 新機能 |
+| fix | バグ修正 |
+| docs | ドキュメント更新 |
+| test | テスト追加・修正 |
+| refactor | リファクタリング |
+
+**例:**
+```
+feat(frontend): add session memory test
+fix(proxy): pass runtimeSessionId to AgentCore Runtime
+docs(api): update API documentation for session memory
+```
+
 ### セキュリティ
 
 本プロジェクトには是正されていない重大な脆弱性が存在する（`docs/review.md` の X-1〜X-5）。実装前に該当箇所を確認し、同種の問題を新たに作らないこと。
