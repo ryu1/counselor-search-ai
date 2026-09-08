@@ -35,35 +35,9 @@
 
 更新対象の判断基準と完了チェックリストは `docs/documentation-guideline.md` に定義されている。
 
-**違反防止フロー:**
-
-1. **着手前** — 変更がどのドキュメントに影響するか確認
-2. **変更中** — コードとドキュメントを同時に変更
-3. **コミット前** — 同一コミットにコードとドキュメントが含まれているか確認
-4. **コミット時** — 「コード変更 + ドキュメント更新」を1つのコミットメッセージに記載
-
 ### コミットメッセージ
 
 Conventional Commits 形式を遵守する。詳細は `docs/conventions.md` を参照。
-
-```
-<type>(<scope>): <subject>
-```
-
-| type | 用途 |
-|------|------|
-| feat | 新機能 |
-| fix | バグ修正 |
-| docs | ドキュメント更新 |
-| test | テスト追加・修正 |
-| refactor | リファクタリング |
-
-**例:**
-```
-feat(frontend): add session memory test
-fix(proxy): pass runtimeSessionId to AgentCore Runtime
-docs(api): update API documentation for session memory
-```
 
 ### セキュリティ
 
@@ -83,13 +57,6 @@ docs(api): update API documentation for session memory
 - コマンドやパスを記載する場合は実行して確かめる
 - 設定値を記述する場合は該当ファイルの行を参照する
 - 未検証の内容は「※推測」または「※要確認」と明記する
-
-### ドキュメント更新時の確認
-
-ドキュメントを更新する前には、`docs/documentation-guideline.md` の以下のセクションを必ず確認する。
-
-1. **含めるべき内容** — 該当ドキュメントに記載すべき項目を確認
-2. **ドキュメント完了チェックリスト** — 更新後の完了条件を確認
 
 ### 変更の限定
 
