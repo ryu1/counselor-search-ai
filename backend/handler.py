@@ -102,6 +102,15 @@ def _parse_conditions(parameters: dict[str, Any]) -> SearchConditions:
     genders = parameters.get("genders", [])
     ages = parameters.get("ages", [])
     requested_datetime = parameters.get("requested_datetime")
+    datetime_from = parameters.get("datetime_from")
+    datetime_to = parameters.get("datetime_to")
+
+    # datetime_from/datetime_to が指定されている場合は、requested_datetime に変換
+    if datetime_from or datetime_to:
+        requested_datetime = {
+            "start": datetime_from,
+            "end": datetime_to,
+        }
 
     return SearchConditions(
         stations=stations,

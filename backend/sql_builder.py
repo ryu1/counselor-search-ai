@@ -107,6 +107,7 @@ def build_datetime_sql(datetime_cond: Any) -> Optional[str]:
     end = datetime_cond.get("end")
 
     if start and end:
+        # datetime_from/datetime_to 形式の処理
         start_str = start.replace("T", " ").split("+")[0] if "+" in start else start.replace("T", " ")
         end_str = end.replace("T", " ").split("+")[0] if "+" in end else end.replace("T", " ")
         start_time = start_str.split()[-1] if " " in start_str else "14:00"

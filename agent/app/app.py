@@ -45,6 +45,8 @@ def search_counselors(
     genders: list[str] = [],
     ages: list[str] = [],
     requested_datetime: str = None,
+    datetime_from: str = None,
+    datetime_to: str = None,
 ) -> str:
     """カウンセラー検索ツール。ユーザーの希望条件に合致するカウンセリング事務所を検索します。
 
@@ -55,6 +57,8 @@ def search_counselors(
         genders: カウンセラーの性別のリスト（例: ["女性"]）。マスター値: 男性, 女性
         ages: カウンセラーの年代のリスト（例: ["30代"]）。マスター値: 20代, 30代, 40代, 50代, 60代以上
         requested_datetime: 希望日時（ISO 8601形式: 2026-09-12T10:00）
+        datetime_from: 検索開始日時（ISO 8601形式: 2026-09-12T10:00）
+        datetime_to: 検索終了日時（ISO 8601形式: 2026-09-12T11:00）
     """
     parameters = {
         "stations": stations,
@@ -63,6 +67,8 @@ def search_counselors(
         "genders": genders,
         "ages": ages,
         "requested_datetime": requested_datetime,
+        "datetime_from": datetime_from,
+        "datetime_to": datetime_to,
     }
 
     try:
