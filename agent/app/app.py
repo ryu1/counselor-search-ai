@@ -138,17 +138,21 @@ async def invoke(payload, context):
     log.info(f"[AGENT] memory_id: {MEMORY_ID}")
     log.info(f"[AGENT] actor_id: {actor_id}")
 
-    with AgentCoreMemorySessionManager(config, region_name="ap-northeast-1") as session_manager:
-        agent = Agent(
-            model=load_model(),
-            system_prompt=_load_system_prompt(),
-            tools=[search_counselors],
-            session_manager=session_manager,
-        )
+    try:
+        with AgentCoreMemorySessionManager(config, region_name="ap-northeast-1") as session_manager:
+            agent = Agent(
+                model=load_model(),
+                system_prompt=_load_system_prompt(),
+                tools=[search_counselors],
+                session_manager=session_manager,
+            )
 
-        async for event in agent.stream_async(prompt):
-            if "event" in event:
-                yield event
+            async for event in agent.stream_async(prompt):
+                if "event" in event:
+                    yield event
+    except Exception as e:
+        log.error(f"[AGENT] Error: {str(e)}")
+        raise
 
 
 if __name__ == "__main__":
