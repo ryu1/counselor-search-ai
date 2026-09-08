@@ -13,6 +13,7 @@ export const useChatStore = defineStore('chat', () => {
   const isSearching = ref(false)
   const error = ref<string | null>(null)
   const sessionId = ref<string | null>(null)
+  const actorId = ref<string | null>(null)
 
   const addMessage = (role: 'user' | 'assistant', content: string) => {
     messages.value.push({
@@ -38,11 +39,10 @@ export const useChatStore = defineStore('chat', () => {
     addMessage('user', text)
 
     try {
-      // 会話履歴を作成
-      const conversation_history = messages.value.map(msg => ({
-        role: msg.role,
-        content: msg.content,
-      }))
+      // actor_idがなければ生成（最初のリクエスト時）
+      if (!actorId.value) {
+        actorId.value = `actor_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`
+      }
 
       const response = await fetch(API_URL, {
         method: 'POST',
@@ -52,7 +52,7 @@ export const useChatStore = defineStore('chat', () => {
         body: JSON.stringify({
           query: text,
           session_id: sessionId.value,
-          conversation_history: conversation_history,
+          actor_id: actorId.value,
         }),
       })
 
@@ -84,7 +84,8 @@ export const useChatStore = defineStore('chat', () => {
     messages.value = []
     error.value = null
     sessionId.value = null
+    actorId.value = null
   }
 
-  return { messages, isSearching, error, sessionId, addMessage, sendSearch, clearChat }
+  return { messages, isSearching, error, sessionId, actorId, addMessage, sendSearch, clearChat }
 })

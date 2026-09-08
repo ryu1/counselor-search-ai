@@ -24,17 +24,17 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         body = json.loads(event.get("body", "{}"))
         query = body.get("query", "")
         session_id = body.get("session_id")
-        conversation_history = body.get("conversation_history", [])
+        actor_id = body.get("actor_id")
 
         print(f"[PROXY] query: {query[:50]}...")
         print(f"[PROXY] session_id from frontend: {session_id}")
-        print(f"[PROXY] conversation_history: {len(conversation_history)} messages")
+        print(f"[PROXY] actor_id from frontend: {actor_id}")
 
         if not query:
             return _response(400, {"success": False, "error": {"message": "query is required"}})
 
         # AgentCore Runtime を呼び出し
-        result = _invoke_agentcore(query, session_id, conversation_history)
+        result = _invoke_agentcore(query, session_id, actor_id)
 
         print(f"[PROXY] session_id in response: {result.get('session_id')}")
 
@@ -45,7 +45,7 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         return _response(500, {"success": False, "error": {"message": str(e)}})
 
 
-def _invoke_agentcore(prompt: str, session_id: str = None, conversation_history: list = []) -> Dict[str, Any]:
+def _invoke_agentcore(prompt: str, session_id: str = None, actor_id: str = None) -> Dict[str, Any]:
     """AgentCore Runtime を呼び出す。"""
     import boto3
     import re
@@ -56,18 +56,11 @@ def _invoke_agentcore(prompt: str, session_id: str = None, conversation_history:
 
     client = boto3.client("bedrock-agentcore", region_name=region)
 
-    # 会話履歴をプロンプトに追加
-    full_prompt = prompt
-    if conversation_history:
-        history_text = "\n".join([
-            f"{'ユーザー' if msg['role'] == 'user' else 'アシスタント'}: {msg['content']}"
-            for msg in conversation_history
-        ])
-        full_prompt = f"会話履歴:\n{history_text}\n\n現在のユーザーの発言:\n{prompt}"
-        print(f"[PROXY] prompt with history: {full_prompt[:200]}...")
-
-    # ペイロードにセッションIDを含める
-    payload_data = {"prompt": full_prompt}
+    # ペイロードにセッションIDとアクターIDを含める
+    payload_data = {
+        "prompt": prompt,
+        "actor_id": actor_id,
+    }
 
     # runtimeSessionId は33文字以上必要
     runtime_session_id = session_id if session_id and len(session_id) >= 33 else None
