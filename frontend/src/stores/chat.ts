@@ -15,6 +15,16 @@ export const useChatStore = defineStore('chat', () => {
   const sessionId = ref<string | null>(null)
   const actorId = ref<string | null>(null)
 
+  // 初期化時にsession_idとactor_idを生成
+  const initializeSession = () => {
+    if (!sessionId.value) {
+      sessionId.value = `sid_${Date.now()}_${Math.random().toString(36).substring(2, 18)}`
+    }
+    if (!actorId.value) {
+      actorId.value = `actor_${Date.now()}_${Math.random().toString(36).substring(2, 18)}`
+    }
+  }
+
   const addMessage = (role: 'user' | 'assistant', content: string) => {
     messages.value.push({
       id: Date.now(),
@@ -39,10 +49,8 @@ export const useChatStore = defineStore('chat', () => {
     addMessage('user', text)
 
     try {
-      // actor_idがなければ生成（最初のリクエスト時）
-      if (!actorId.value) {
-        actorId.value = `actor_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`
-      }
+      // セッションを初期化（初回のみ生成）
+      initializeSession()
 
       const response = await fetch(API_URL, {
         method: 'POST',
@@ -63,7 +71,7 @@ export const useChatStore = defineStore('chat', () => {
 
       const result = await response.json()
 
-      // Session ID を保存
+      // Session ID を保存（レスポンスから更新される場合がある）
       if (result.session_id) {
         sessionId.value = result.session_id
       }
