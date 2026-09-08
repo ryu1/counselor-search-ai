@@ -112,15 +112,39 @@ def build_datetime_sql(datetime_cond: Any) -> Optional[str]:
         end_str = end.replace("T", " ").split("+")[0] if "+" in end else end.replace("T", " ")
         start_time = start_str.split()[-1] if " " in start_str else "14:00"
         end_time = end_str.split()[-1] if " " in end_str else "15:00"
-        return (
-            "EXISTS ("
-            "SELECT 1 "
-            "FROM UNNEST(o.opening_hours_specification) AS t(day) "
-            "WHERE "
-            "CAST(day.opens AS TIME) <= TIME '" + end_time + ":00' "
-            "AND CAST(day.closes AS TIME) >= TIME '" + start_time + ":00:00'"
-            ")"
-        )
+
+        # 曜日を抽出（ISO 8601形式から）
+        from datetime import datetime as dt
+        try:
+            start_dt = dt.fromisoformat(start.replace("Z", "+00:00"))
+            weekday_names = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+            target_day = weekday_names[start_dt.weekday()]
+        except (ValueError, IndexError):
+            target_day = None
+
+        # 曜日と時間曜日と時間帯の両方をチェック
+        if target_day:
+            return (
+                "EXISTS ("
+                "SELECT 1 "
+                "FROM UNNEST(o.opening_hours_specification) AS t(day) "
+                "WHERE "
+                "day.dayOfWeek = '" + target_day + "' "
+                "AND CAST(day.opens AS TIME) <= TIME '" + end_time + ":00' "
+                "AND CAST(day.closes AS TIME) >= TIME '" + start_time + ":00:00'"
+                ")"
+            )
+        else:
+            # 曜日が不明な場合は時間帯のみチェック
+            return (
+                "EXISTS ("
+                "SELECT 1 "
+                "FROM UNNEST(o.opening_hours_specification) AS t(day) "
+                "WHERE "
+                "CAST(day.opens AS TIME) <= TIME '" + end_time + ":00' "
+                "AND CAST(day.closes AS TIME) >= TIME '" + start_time + ":00:00'"
+                ")"
+            )
     elif day_of_week:
         return (
             "EXISTS ("
