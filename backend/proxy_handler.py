@@ -50,13 +50,18 @@ def _invoke_agentcore(prompt: str, session_id: str = None) -> Dict[str, Any]:
 
     # ペイロードにセッションIDを含める
     payload_data = {"prompt": prompt}
-    if session_id:
-        payload_data["session_id"] = session_id
 
-    response = client.invoke_agent_runtime(
-        agentRuntimeArn=AGENTCORE_RUNTIME_ARN,
-        payload=json.dumps(payload_data).encode("utf-8"),
-    )
+    # runtimeSessionId は33文字以上必要
+    runtime_session_id = session_id if session_id and len(session_id) >= 33 else None
+
+    invoke_kwargs = {
+        "agentRuntimeArn": AGENTCORE_RUNTIME_ARN,
+        "payload": json.dumps(payload_data).encode("utf-8"),
+    }
+    if runtime_session_id:
+        invoke_kwargs["runtimeSessionId"] = runtime_session_id
+
+    response = client.invoke_agent_runtime(**invoke_kwargs)
 
     # レスポンスを処理（StreamingBody に対応）
     response_body = response.get("response")
