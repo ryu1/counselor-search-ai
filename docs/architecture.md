@@ -85,7 +85,19 @@ interface ChatState {
 | `CounselorSearchAgent` | 会話制御・条件抽出・Tool呼出・応答生成 | Bedrock AgentCore Runtime |
 | `SystemPrompt` | エージェント指示・マスター値定義・日時正規化ルール | プロンプトエンジニアリング |
 | `ToolDefinition` | `search_counselors` Tool仕様・入力スキーマ | JSON Schema |
-| `SessionManager` | 会話状態保持・現在日時注入 | AgentCore標準機能 |
+| `SessionManager` | 会話状態保持・AgentCore Memory連携 | AgentCoreMemorySessionManager |
+
+**セッション管理:**
+
+AgentCore Memoryを使用して会話を保持します。フロントエンドがセッションIDとアクターIDを生成し、各リクエストで送信します。
+
+```
+フロントエンド → session_id + actor_id 生成 → プロキシ → AgentCore Runtime → AgentCore Memory
+```
+
+- `session_id`: 33文字以上。AgentCore Runtimeのバリデーションで33文字未満の場合、セッションが正しく管理されません
+- `actor_id`: 33文字以上。ユーザーごとに一意の識別子
+- `memory_id`: `CounselorSearchAI_session_memory-s7sxexEu5z`（環境変数で注入）
 
 **Agent システムプロンプト構成:**
 ```

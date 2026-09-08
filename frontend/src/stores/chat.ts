@@ -16,12 +16,19 @@ export const useChatStore = defineStore('chat', () => {
   const actorId = ref<string | null>(null)
 
   // 初期化時にsession_idとactor_idを生成
+  const generateId = (prefix: string) => {
+    const ts = Date.now()
+    const r1 = Math.random().toString(36).substring(2, 10)
+    const r2 = Math.random().toString(36).substring(2, 10)
+    return `${prefix}${ts}${r1}${r2}`
+  }
+
   const initializeSession = () => {
     if (!sessionId.value) {
-      sessionId.value = `sid_${Date.now()}_${Math.random().toString(36).substring(2, 18)}`
+      sessionId.value = generateId('sid_')
     }
     if (!actorId.value) {
-      actorId.value = `actor_${Date.now()}_${Math.random().toString(36).substring(2, 18)}`
+      actorId.value = generateId('actor_')
     }
   }
 

@@ -13,73 +13,63 @@
 
 ### 2.1 エンドポイント
 
-AgentCore Runtimeのデフォルトエンドポイントを使用：
+API Gateway経由でプロキシLambdaに転送：
 
 ```
-POST https://<agentcore-endpoint>.bedrock-agentcore.<region>.amazonaws.com/invocations
+POST https://u420b7ott4.execute-api.ap-northeast-1.amazonaws.com/prod
 ```
-
-※ CloudFormationで作成されるAgentCore RuntimeエンドポイントURLを環境変数で注入
 
 ### 2.2 リクエスト
 
 **Headers:**
 ```
 Content-Type: application/json
-Authorization: Bearer <token>  // デモ用は未実装・将来Cognito対応時追加
-X-Session-Id: <uuid>           // 会話セッション識別子
-X-Current-Datetime: <ISO8601>  // 現在日時 (Asia/Tokyo) 例: 2026-09-03T08:30:00+09:00
-X-Timezone: Asia/Tokyo
 ```
 
 **Body:**
 ```json
 {
-  "message": "新宿駅で女性のカウンセラーにオンラインで土曜の14時ごろ相談したい",
-  "session_id": "550e8400-e29b-41d4-a716-446655440000"
+  "query": "仕事のストレスで悩んでいます",
+  "session_id": "sid_1788852100000_abcdefghij12",
+  "actor_id": "actor_1788852100000_abcdefghij12"
 }
 ```
 
 | フィールド | 型 | 必須 | 説明 |
 |-----------|-----|------|------|
-| message | string | Yes | ユーザー入力メッセージ (1-2000文字) |
-| session_id | string | Yes | セッションID (UUID v4) 初回はフロントで生成 |
+| query | string | Yes | ユーザー入力メッセージ (1-2000文字) |
+| session_id | string | Yes | セッションID (33文字以上)。フロントエンドで初回リクエスト時に生成 |
+| actor_id | string | Yes | アクターID (33文字以上)。フロントエンドで初回リクエスト時に生成 |
+
+**注意:** `session_id` と `actor_id` は33文字以上必要です。AgentCore Runtimeのバリデーションで33文字未満の場合、セッションが正しく管理されません。
 
 ### 2.3 レスポンス
 
 **Success (200):**
 ```json
 {
-  "response": "承知しました。土曜14時ごろですね。相談したい内容（専門領域）はありますか？",
-  "session_id": "550e8400-e29b-41d4-a716-446655440000",
-  "status": "question",
-  "extracted_conditions": {
-    "stations": ["新宿駅"],
-    "genders": ["女性"],
-    "methods": ["オンライン"],
-    "requested_datetime": {
-      "day_of_week": "Saturday",
-      "around": "14:00",
-      "tolerance_minutes": 60
-    }
-  }
+  "success": true,
+  "result": {
+    "answer": "お仕事のストレスでお悩みなのですね。\n\nまず、ご希望の相談方法はありますか？",
+    "results": []
+  },
+  "session_id": "sid_1788852100000_abcdefghij12"
 }
 ```
 
 | フィールド | 型 | 説明 |
 |-----------|-----|------|
-| response | string | AI生成応答メッセージ (Markdown可) |
+| success | boolean | 成否 |
+| result.answer | string | AI生成応答メッセージ (Markdown可) |
+| result.results | array | 検索結果（検索実行時のみ値あり） |
 | session_id | string | 同一セッションID |
-| status | enum | `question` (追加質問) / `searching` (検索中) / `result` (結果表示) / `error` |
-| extracted_conditions | object | 抽出済み検索条件（フロント表示用・任意） |
 
 **Error (4xx/5xx):**
 ```json
 {
+  "success": false,
   "error": {
-    "code": "VALIDATION_ERROR",
-    "message": "メッセージが空です",
-    "details": {}
+    "message": "query is required"
   }
 }
 ```
