@@ -38,6 +38,12 @@ export const useChatStore = defineStore('chat', () => {
     addMessage('user', text)
 
     try {
+      // 会話履歴を作成
+      const conversation_history = messages.value.map(msg => ({
+        role: msg.role,
+        content: msg.content,
+      }))
+
       const response = await fetch(API_URL, {
         method: 'POST',
         headers: {
@@ -46,6 +52,7 @@ export const useChatStore = defineStore('chat', () => {
         body: JSON.stringify({
           query: text,
           session_id: sessionId.value,
+          conversation_history: conversation_history,
         }),
       })
 

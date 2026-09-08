@@ -9,15 +9,12 @@ from pathlib import Path
 import boto3
 from strands import Agent, tool
 from bedrock_agentcore.runtime import BedrockAgentCoreApp
-from bedrock_agentcore.memory.integrations.strands.config import AgentCoreMemoryConfig
-from bedrock_agentcore.memory.integrations.strands.session_manager import AgentCoreMemorySessionManager
 from model.load import load_model
 
 app = BedrockAgentCoreApp()
 log = app.logger
 
 LAMBDA_FUNCTION_NAME = os.environ.get("LAMBDA_FUNCTION_NAME", "search_counselors")
-MEMORY_ID = os.environ.get("AGENTCORE_MEMORY_ID", "")
 
 SYSTEM_PROMPT_PATH = Path(__file__).parent / "system-prompt.md"
 
@@ -124,35 +121,15 @@ async def invoke(payload, context):
     log.info(f"[AGENT] session_id: {session_id}")
     log.info(f"[AGENT] prompt: {prompt[:100]}...")
 
-    # Actor ID を生成（ユーザーごとに一意）
-    actor_id = f"actor_{session_id}"
-
-    # AgentCore Memory Session Manager を作成
-    config = AgentCoreMemoryConfig(
-        memory_id=MEMORY_ID,
-        session_id=session_id,
-        actor_id=actor_id,
-        batch_size=10,
+    agent = Agent(
+        model=load_model(),
+        system_prompt=_load_system_prompt(),
+        tools=[search_counselors],
     )
 
-    log.info(f"[AGENT] memory_id: {MEMORY_ID}")
-    log.info(f"[AGENT] actor_id: {actor_id}")
-
-    try:
-        with AgentCoreMemorySessionManager(config, region_name="ap-northeast-1") as session_manager:
-            agent = Agent(
-                model=load_model(),
-                system_prompt=_load_system_prompt(),
-                tools=[search_counselors],
-                session_manager=session_manager,
-            )
-
-            async for event in agent.stream_async(prompt):
-                if "event" in event:
-                    yield event
-    except Exception as e:
-        log.error(f"[AGENT] Error: {str(e)}")
-        raise
+    async for event in agent.stream_async(prompt):
+        if "event" in event:
+            yield event
 
 
 if __name__ == "__main__":
