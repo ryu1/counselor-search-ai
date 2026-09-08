@@ -17,11 +17,23 @@
         {
           "name": "LAMBDA_FUNCTION_NAME",
           "value": "search_counselors"
+        },
+        {
+          "name": "AGENTCORE_MEMORY_ID",
+          "value": "CounselorSearchAI_session_memory-s7sxexEu5z"
         }
       ]
     }
   ],
-  "memories": [],
+  "memories": [
+    {
+      "name": "session_memory",
+      "description": "Session memory for conversation history",
+      "type": "SHORT_TERM",
+      "defaultRetentionMinutes": 60,
+      "eventExpiryDuration": 24
+    }
+  ],
   "knowledgeBases": [],
   "credentials": [],
   "evaluators": [],

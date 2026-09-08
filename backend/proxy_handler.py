@@ -73,6 +73,7 @@ def _invoke_agentcore(prompt: str, session_id: str = None) -> Dict[str, Any]:
     # ストリーミングレスポンスからテキストを抽出
     # data: {"event": {"contentBlockDelta": {"delta": {"text": "..."}, ...}}} 形式
     text_parts = []
+    response_session_id = None
     for line in raw_text.split("\n"):
         if line.startswith("data: "):
             try:
@@ -80,6 +81,9 @@ def _invoke_agentcore(prompt: str, session_id: str = None) -> Dict[str, Any]:
                 delta = event.get("event", {}).get("contentBlockDelta", {}).get("delta", {})
                 if "text" in delta:
                     text_parts.append(delta["text"])
+                # セッションIDを抽出
+                if "session_id" in event:
+                    response_session_id = event["session_id"]
             except json.JSONDecodeError:
                 pass
 
@@ -94,12 +98,14 @@ def _invoke_agentcore(prompt: str, session_id: str = None) -> Dict[str, Any]:
         },
     }
 
-    # セッションIDが指定されていない場合は、初回のセッションIDを生成
-    if not session_id:
+    # セッションIDを設定
+    if response_session_id:
+        result["session_id"] = response_session_id
+    elif session_id:
+        result["session_id"] = session_id
+    else:
         import uuid
         result["session_id"] = str(uuid.uuid4())
-    else:
-        result["session_id"] = session_id
 
     return result
 
