@@ -121,6 +121,9 @@ async def invoke(payload, context):
     prompt = process_prompt(payload.get("prompt", ""))
     session_id = context.session_id
 
+    log.info(f"[AGENT] session_id: {session_id}")
+    log.info(f"[AGENT] prompt: {prompt[:100]}...")
+
     # Actor ID を生成（ユーザーごとに一意）
     actor_id = f"actor_{session_id}"
 
@@ -131,6 +134,9 @@ async def invoke(payload, context):
         actor_id=actor_id,
         batch_size=10,
     )
+
+    log.info(f"[AGENT] memory_id: {MEMORY_ID}")
+    log.info(f"[AGENT] actor_id: {actor_id}")
 
     with AgentCoreMemorySessionManager(config, region_name="ap-northeast-1") as session_manager:
         agent = Agent(

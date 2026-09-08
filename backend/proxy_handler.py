@@ -25,15 +25,21 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         query = body.get("query", "")
         session_id = body.get("session_id")
 
+        print(f"[PROXY] query: {query[:50]}...")
+        print(f"[PROXY] session_id from frontend: {session_id}")
+
         if not query:
             return _response(400, {"success": False, "error": {"message": "query is required"}})
 
         # AgentCore Runtime を呼び出し
         result = _invoke_agentcore(query, session_id)
 
+        print(f"[PROXY] session_id in response: {result.get('session_id')}")
+
         return _response(200, result)
 
     except Exception as e:
+        print(f"[PROXY] Error: {str(e)}")
         return _response(500, {"success": False, "error": {"message": str(e)}})
 
 
