@@ -19,7 +19,6 @@
         :placeholder="placeholder"
         :disabled="isSearching"
         rows="2"
-        @keydown.enter.prevent="submitSearch"
       ></textarea>
 
       <div class="action-buttons">
