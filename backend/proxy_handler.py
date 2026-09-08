@@ -23,12 +23,13 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         # リクエストボディを解析
         body = json.loads(event.get("body", "{}"))
         query = body.get("query", "")
+        messages = body.get("messages", [])
 
         if not query:
             return _response(400, {"success": False, "error": {"message": "query is required"}})
 
         # AgentCore Runtime を呼び出し
-        result = _invoke_agentcore(query)
+        result = _invoke_agentcore(query, messages)
 
         return _response(200, result)
 
@@ -36,7 +37,7 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         return _response(500, {"success": False, "error": {"message": str(e)}})
 
 
-def _invoke_agentcore(prompt: str) -> Dict[str, Any]:
+def _invoke_agentcore(prompt: str, messages: list = None) -> Dict[str, Any]:
     """AgentCore Runtime を呼び出す。"""
     import boto3
     import re
@@ -47,9 +48,14 @@ def _invoke_agentcore(prompt: str) -> Dict[str, Any]:
 
     client = boto3.client("bedrock-agentcore", region_name=region)
 
+    # ペイロードにメッセージ履歴を含める
+    payload_data = {"prompt": prompt}
+    if messages:
+        payload_data["messages"] = messages
+
     response = client.invoke_agent_runtime(
         agentRuntimeArn=AGENTCORE_RUNTIME_ARN,
-        payload=json.dumps({"prompt": prompt}).encode("utf-8"),
+        payload=json.dumps(payload_data).encode("utf-8"),
     )
 
     # レスポンスを処理（StreamingBody に対応）
