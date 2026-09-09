@@ -1,7 +1,3 @@
-
-
-https://github.com/user-attachments/assets/e118f8eb-bdef-42fc-9b64-04f6ac8e794a
-
 # カウンセラー検索AIデモ
 
 [![Python](https://img.shields.io/badge/Python-3.11-blue?logo=python&logoColor=white)](https://www.python.org/)
