@@ -1,3 +1,7 @@
+
+
+https://github.com/user-attachments/assets/e118f8eb-bdef-42fc-9b64-04f6ac8e794a
+
 # カウンセラー検索AIデモ
 
 [![Python](https://img.shields.io/badge/Python-3.11-blue?logo=python&logoColor=white)](https://www.python.org/)
@@ -10,9 +14,7 @@
 
 ## デモ
 
-<video src="demo.mov" controls=""></video>
-
-
+https://github.com/user-attachments/assets/916acbd0-b1c2-4072-a305-803780a64450
 
 ## アプリケーション概要・特長
 
