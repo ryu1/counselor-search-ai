@@ -10,7 +10,7 @@
 
 ## デモ
 
-https://github.com/user-attachments/assets/916acbd0-b1c2-4072-a305-803780a64450
+<video src="https://github.com/user-attachments/assets/916acbd0-b1c2-4072-a305-803780a64450" width="400" controls></video>
 
 ## アプリケーション概要・特長
 
