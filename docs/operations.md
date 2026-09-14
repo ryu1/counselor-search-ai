@@ -253,39 +253,143 @@ credentials
 
 ## 7. クリーンアップ
 
-### 7.1 手動クリーンアップ
+### 7.1 削除対象リソース一覧
+
+| カテゴリ | リソース名 | 削除方法 |
+|---------|----------|---------|
+| S3 | `counseling-demo-data` | `aws s3 rb --force` |
+| S3 | `counseling-demo-athena-results` | `aws s3 rb --force` |
+| S3 | `counselor-search-ai-frontend` | `aws s3 rb --force` |
+| Lambda | `search_counselors` | `aws lambda delete-function` |
+| Lambda | `agentcore-proxy` | `aws lambda delete-function` |
+| API Gateway | `CounselorSearchAgentCoreProxy` | `aws apigateway delete-rest-api` |
+| Glue | データベース `counseling_demo_db` | `aws glue delete-database` |
+| Glue | テーブル `offices`, `counselors` | `aws glue delete-table` |
+| Athena | ワークグループ `counseling-demo-wg` | `aws athena delete-work-group --recursive-delete-option` |
+| IAM | インラインポリシー `CounselorSearchPolicy` | `aws iam delete-role-policy` |
+| IAM | インラインポリシー `AgentCoreInvokePolicy` | `aws iam delete-role-policy` |
+| CloudWatch | ロググループ（4つ） | `aws logs delete-log-group` |
+| CloudFormation | スタック `AgentCore-CounselorSearchAI-default` | `aws cloudformation delete-stack` |
+
+**注意**: `lambda_role_himuro` は共有ロールのため削除しない。インラインポリシーのみ削除する。
+
+### 7.2 手動クリーンアップ手順
 
 ```bash
-# 1. S3バケット内容削除
-aws s3 rm s3://counselor-search-ai-data-<account-id> --recursive
-aws s3 rm s3://counselor-search-ai-athena-results-<account-id> --recursive
-aws s3 rm s3://counselor-search-ai-frontend-<account-id> --recursive
+# ===== 1. S3バケット内容削除 =====
+aws s3 rm s3://counseling-demo-data --recursive
+aws s3 rm s3://counseling-demo-athena-results --recursive
+aws s3 rm s3://counselor-search-ai-frontend --recursive
 
-# 2. CloudFormationスタック削除
-bash scripts/teardown.sh
-```
+# ===== 2. Lambda関数削除 =====
+aws lambda delete-function --function-name search_counselors --region ap-northeast-1
+aws lambda delete-function --function-name agentcore-proxy --region ap-northeast-1
 
-### 7.2 自動クリーンアップ（将来）
+# ===== 3. API Gateway削除 =====
+API_ID=$(aws apigateway get-rest-apis \
+  --query "items[?name=='CounselorSearchAgentCoreProxy'].id" \
+  --output text --region ap-northeast-1)
+aws apigateway delete-rest-api --rest-api-id $API_ID --region ap-northeast-1
 
-```yaml
-# CloudFormation スタック作成時にオプション
-Resources:
-  DataBucket:
-    Type: AWS::S3::Bucket
-    DeletionPolicy: Delete  # スタック削除時にバケットも削除
+# ===== 4. Glueテーブル・データベース削除 =====
+aws glue delete-table --database-name counseling_demo_db --name offices --region ap-northeast-1
+aws glue delete-table --database-name counseling_demo_db --name counselors --region ap-northeast-1
+aws glue delete-database --name counseling_demo_db --region ap-northeast-1
+
+# ===== 5. Athenaワークグループ削除 =====
+aws athena delete-work-group \
+  --work-group counseling-demo-wg \
+  --recursive-delete-option \
+  --region ap-northeast-1
+
+# ===== 6. S3バケット削除 =====
+aws s3 rb s3://counseling-demo-data --region ap-northeast-1
+aws s3 rb s3://counseling-demo-athena-results --region ap-northeast-1
+aws s3 rb s3://counselor-search-ai-frontend --region ap-northeast-1
+
+# ===== 7. IAMインラインポリシー削除 =====
+aws iam delete-role-policy \
+  --role-name lambda_role_himuro \
+  --policy-name CounselorSearchPolicy
+aws iam delete-role-policy \
+  --role-name lambda_role_himuro \
+  --policy-name AgentCoreInvokePolicy
+
+# ===== 8. CloudWatch Logs削除 =====
+aws logs delete-log-group \
+  --log-group-name "/aws/lambda/search_counselors" --region ap-northeast-1
+aws logs delete-log-group \
+  --log-group-name "/aws/lambda/agentcore-proxy" --region ap-northeast-1
+aws logs delete-log-group \
+  --log-group-name "/aws/bedrock-agentcore/runtimes/CounselorSearchAI_counselor_search_agent-1UyHcYHZG3-DEFAULT" \
+  --region ap-northeast-1
+aws logs delete-log-group \
+  --log-group-name "/aws/bedrock-agentcore/runtimes/CounselorSearchAI_counselor_search_agent-KlIOGyAYbm-DEFAULT" \
+  --region ap-northeast-1
+
+# ===== 9. AgentCore CloudFormationスタック削除 =====
+aws cloudformation delete-stack \
+  --stack-name AgentCore-CounselorSearchAI-default \
+  --region ap-northeast-1
+aws cloudformation wait stack-delete-complete \
+  --stack-name AgentCore-CounselorSearchAI-default \
+  --region ap-northeast-1
 ```
 
 ### 7.3 削除確認
 
 ```bash
-# スタック削除完了確認
-aws cloudformation describe-stacks \
-  --stack-name counseling-demo \
-  --query 'Stacks[0].StackStatus' \
-  --output text
-# 期待: DELETE_COMPLETE
-
-# 残存リソース確認
-aws s3 ls | grep counseling-demo
+# S3バケット確認
+aws s3 ls | grep -E "counseling|counselor-search"
 # 期待: 出力なし
+
+# Lambda関数確認
+aws lambda list-functions \
+  --query "Functions[?contains(FunctionName, \`search_counselors\`) || contains(FunctionName, \`agentcore-proxy\`)].FunctionName" \
+  --output text --region ap-northeast-1
+# 期待: 出力なし
+
+# API Gateway確認
+aws apigateway get-rest-apis \
+  --query "items[?contains(name, \`CounselorSearch\`)].name" \
+  --output text --region ap-northeast-1
+# 期待: 出力なし
+
+# Glue確認
+aws glue get-databases \
+  --query "DatabaseList[?contains(Name, \`counseling\`)].Name" \
+  --output text --region ap-northeast-1
+# 期待: 出力なし
+
+# Athenaワークグループ確認
+aws athena list-work-groups \
+  --query "WorkGroups[?contains(Name, \`counseling\`)].Name" \
+  --output text --region ap-northeast-1
+# 期待: 出力なし
+
+# CloudWatch Logs確認
+aws logs describe-log-groups \
+  --query "logGroups[?contains(logGroupName, \`counseling\`) || contains(logGroupName, \`search_counselors\`) || contains(logGroupName, \`agentcore\`)].logGroupName" \
+  --output text --region ap-northeast-1
+# 期待: 出力なし
+
+# IAMポリシー確認
+aws iam list-role-policies --role-name lambda_role_himuro \
+  --query "PolicyNames[?contains(@, \`Counselor\`) || contains(@, \`AgentCore\`)]" \
+  --output text
+# 期待: 出力なし
+
+# CloudFormationスタック確認
+aws cloudformation describe-stacks \
+  --stack-name AgentCore-CounselorSearchAI-default \
+  --region ap-northeast-1 2>&1
+# 期待: Stack with id AgentCore-CounselorSearchAI-default does not exist
 ```
+
+### 7.4 注意事項
+
+- **Athena ワークグループ**: `--recursive-delete-option` を指定しないと、クエリ実行履歴があるため削除エラーになる。必ずこのフラグを付けること。
+- **S3 バケット**: バケット内のオブジェクトを先に削除してからバケットを削除する。`--force` フラグでも一括削除可能だが、念のため先に中身を空にする。
+- **AgentCore CloudFormation スタック**: CDK でデプロイされたスタック。`wait stack-delete-complete` で削除完了を待つ。
+- **共有 IAM ロール**: `lambda_role_himuro` は他のプロジェクトで使用中の可能性があるため、ロール自体は削除しない。インラインポリシーのみ削除する。
+- **CloudWatch Logs**: Lambda 関数削除後もロググループが残るため、明示的に削除する必要がある。
