@@ -29,20 +29,23 @@
 | Bedrock AgentCore Gateway | MCP Gateway | MCPプロトコル対応・IAM認証統合 |
 
 ### 1.3 開発ツール
-
-| ツール | 用途 | 理由 |
-|-------|------|------|
-| Python 3.11 | Lambdaランタイム | 高速・型注釈対応・Athena boto3対応 |
-| boto3 | AWS SDK | Lambda内Athena操作 |
-| pytest | テストフレームワーク | Python標準的・フィクスチャ充実 |
-| mypy | 型チェッカー | 静的型検証 |
-| ruff | リンター・フォーマッター | 高速・複数ルール統合 |
-| FastAPI | 予約APIフレームワーク | 高速・ASGI・自動OpenAPI生成 |
-| SQLModel | 予約API ORM | Pydantic統合・SQLAlchemyベース |
-| Zappa | Lambdaデプロイ | FastAPI ASGI対応・簡単デプロイ |
-| Node.js 20 LTS | フロントエンドビルド | Vite要求バージョン |
-| ESLint | TypeScriptリンター | Vue公式推奨 |
-| Prettier | コードフォーマッター | 統一フォーマット |
+ 
+ | ツール | 用途 | 理由 |
+ |-------|------|------|
+ | Python 3.11 | Lambdaランタイム | 高速・型注釈対応・Athena boto3対応 |
+ | boto3 | AWS SDK | Lambda内Athena操作 |
+ | pytest | テストフレームワーク | Python標準的・フィクスチャ充実 |
+ | mypy | 型チェッカー | 静的型検証 |
+ | ruff | リンター・フォーマッター | 高速・複数ルール統合 |
+ | FastAPI | 予約APIフレームワーク | 高速・ASGI・自動OpenAPI生成 |
+ | SQLModel | 予約API ORM | Pydantic統合・SQLAlchemyベース |
+ | Zappa | Lambdaデプロイ | FastAPI ASGI対応・簡単デプロイ |
+ | pydantic-settings | 設定管理 | 環境変数ベースの設定・バリデーション |
+ | python-multipart | フォームデータ解析 | FastAPIでのmultipart/form-data対応 |
+ | botocore[crt] | AWS SDK (CRT) | 高速・安定なAWS API通信 |
+ | Node.js 20 LTS | フロントエンドビルド | Vite要求バージョン |
+ | ESLint | TypeScriptリンター | Vue公式推奨 |
+ | Prettier | コードフォーマッター | 統一フォーマット |
 
 ---
 
@@ -148,29 +151,6 @@
 }
 ```
 
-### バックエンド (`backend/requirements.txt` / `backend/pyproject.toml`)
-
-Pythonパッケージは `pyproject.toml` で管理し、依存関係は以下の通り。
-
-**pyproject.toml**（プロジェクトルート `backend/` に配置）:
-
-```toml
-[project]
-name = "counselor-search-ai-backend"
-version = "0.1.0"
-requires-python = ">=3.11.15"
-
-[project.dependencies]
-boto3 >= 1.35.0,<2.0.0
-
-[project.optional-dependencies]
-dev = [
-    "pytest >= 8.3.0,<9.0.0",
-    "mypy >= 1.11.0,<2.0.0",
-    "ruff >= 0.6.0,<1.0.0",
-]
-```
-
 **requirements.txt**（`uv export` で自動生成・デプロイ時使用）:
 
 ```bash
@@ -185,3 +165,39 @@ uv export --format requirements.txt --extra-dev > requirements-dev.txt
 
 - **本体**: `boto3>=1.35.0,<2.0.0`
 - **開発**: `pytest>=8.3.0,<9.0.0`, `mypy>=1.11.0,<2.0.0`, `ruff>=0.6.0,<1.0.0`
+
+### 予約APIスタブ (`booking-api-stub/pyproject.toml`)
+
+```toml
+[project]
+name = "booking-api-stub"
+version = "0.1.0"
+description = "カウンセリング予約APIスタブ"
+requires-python = ">=3.11.15"
+
+dependencies = [
+    "fastapi[standard]>=0.110.0,<1.0.0",
+    "uvicorn>=0.29.0,<1.0.0",
+    "sqlmodel>=0.0.22,<1.0.0",
+    "pydantic-settings>=2.3.0,<3.0.0",
+    "python-multipart>=0.0.9,<1.0.0",
+    "botocore[crt]>=1.43.101",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest >= 8.3.0,<9.0.0",
+    "pytest-asyncio >= 0.23.0,<1.0.0",
+    "httpx >= 0.27.0,<1.0.0",
+    "ruff >= 0.6.0,<1.0.0",
+    "pyright >= 1.1.0,<2.0.0",
+    "zappa >= 0.60.0,<1.0.0",
+]
+```
+
+ライブラリ一覧:
+
+- **本体 (backend)**: `boto3>=1.35.0,<2.0.0`
+- **本体 (booking-api-stub)**: `fastapi[standard]>=0.110.0`, `uvicorn>=0.29.0`, `sqlmodel>=0.0.22`, `pydantic-settings>=2.3.0`, `python-multipart>=0.0.9`, `botocore[crt]>=1.43.101`
+- **開発 (backend)**: `pytest>=8.3.0`, `mypy>=1.11.0`, `ruff>=0.6.0`
+- **開発 (booking-api-stub)**: `pytest>=8.3.0`, `pytest-asyncio>=0.23.0`, `httpx>=0.27.0`, `ruff>=0.6.0`, `pyright>=1.1.0`, `zappa>=0.60.0`
