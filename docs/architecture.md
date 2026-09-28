@@ -142,50 +142,7 @@ AgentCore Memoryを使用して会話を保持します。フロントエンド�
 | `database.py` | DB接続・セッション管理 | SQLModel + SQLite |
 | `zappa_settings.json` | Zappaデプロイ設定 | Zappa 0.60+ |
 
-**エンドポイント:**
-
-| メソッド | パス | 説明 |
-|---------|------|------|
-| POST | `/bookings` | 予約登録 |
-| GET | `/health` | ヘルスチェック |
-
-**POST /bookings リクエストボディ:**
-
-```json
-{
-  "name": "田中太郎",
-  "email": "tanaka@example.com",
-  "booking_datetime": "2026-10-01T10:00:00",
-  "consultation_content": "仕事のストレスについて相談したい",
-  "counseling_office_name": "東京カウンセリングオフィス"
-}
-```
-
-| フィールド | 型 | 必須 | 説明 |
-|-----------|-----|------|------|
-| name | string | ✓ | 予約者名（1-100文字） |
-| email | string | ✓ | メールアドレス（メール形式） |
-| booking_datetime | string | ✓ | 予約日時（ISO 8601形式） |
-| consultation_content | string | ✓ | 相談内容（1文字以上） |
-| counseling_office_name | string | ✓ | カウンセリングオフィス名（1-200文字） |
-
-**POST /bookings レスポンス (201 Created):**
-
-```json
-{
-  "id": 1,
-  "name": "田中太郎",
-  "email": "tanaka@example.com",
-  "booking_datetime": "2026-10-01T10:00:00",
-  "consultation_content": "仕事のストレスについて相談したい",
-  "counseling_office_name": "東京カウンセリングオフィス",
-  "created_at": "2026-09-24T12:34:56.789012"
-}
-```
-
-**エラーレスポンス (422 Unprocessable Entity):**
-
-FastAPI標準のバリデーションエラー形式。
+**エンドポイント:** 詳細は [API設計書](../api.md#8-予約api-booking-api-stub) を参照
 
 **AgentCore Gateway 連携:**
 
