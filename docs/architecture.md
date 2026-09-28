@@ -194,9 +194,12 @@ FastAPI標準のバリデーションエラー形式。
 | ゲートウェイ名 | `booking-api-gateway` |
 | ターゲット名 | `booking-api-target` |
 | ターゲットタイプ | `passthrough` (MCP Protocol) |
-| エンドポイント | `https://aw45ua4i97.execute-api.ap-northeast-1.amazonaws.com/dev` |
+| エンドポイント | `https://<booking-api-stub-api-gateway-url>/dev` |
 | プロトコル | MCP |
 | 認証 | GATEWAY_IAM_ROLE (SigV4) |
+
+> **注意**: `エンドポイント` は booking-api-stub デプロイ時に作成される API Gateway の URL に置き換えてください。
+> 形式: `https://<api-id>.execute-api.<region>.amazonaws.com/<stage>`
 
 **MCP Client 実装:**
 

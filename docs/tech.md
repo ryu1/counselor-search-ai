@@ -78,7 +78,7 @@
 | ASGI対応 | `app_type: "asgi"` 必須 |
 | パッケージサイズ制限 | 50MB (Zappa制限、`slim_handler`で対応) |
 | API Gatewayタイムアウト | 30秒 |
-| SQLite永続性 | Lambda `/tmp` のみ・冷間起動時に消失可能性あり |
+| SQLite永続性 | Lambda `/tmp` のみ・冷間起動時に消失可能性あり。Zappa `slim_handler: true` 使用時は依存関係を S3 に配置し、冷間起動時に自動展開されるため問題なし |
 
 ---
 

@@ -576,21 +576,29 @@ uv run zappa tail dev
 uv run zappa undeploy dev
 ```
 
-### 9.5 AgentCore Runtime デプロイ
+### 9.5 AgentCore Gateway デプロイ
+
+Gatewayは `agent/agentcore/agentcore.json` で定義され、AgentCore Runtime デプロイ時に自動作成されます。
+**重要**: `passthrough-endpoint` には booking-api-stub の API Gateway URL を指定してください。
 
 ```bash
-cd agent
+# 1. まず booking-api-stub をデプロイして API Gateway URL を取得
+cd booking-api-stub
+uv run zappa deploy dev
 
-# 依存関係インストール
+# デプロイ後に表示される API Gateway URL を確認
+# 例: https://xxxxxxxxxx.execute-api.ap-northeast-1.amazonaws.com/dev
+
+# 2. agentcore.json の passthrough-endpoint を booking-api-stub の URL に更新
+# agent/agentcore/agentcore.json を編集
+
+# 3. AgentCore Runtime デプロイ（Gatewayも自動作成される）
+cd ../agent
 uv sync
-
-# デプロイ（初回・更新共通）
 AWS_PROFILE=nvc-study uv run agentcore deploy -y
 ```
 
-### 9.6 AgentCore Gateway デプロイ
-
-Gatewayは `agent/agentcore/agentcore.json` で定義され、AgentCore Runtime デプロイ時に自動作成されます。
+### 9.6 AgentCore Gateway ターゲット手動追加（必要な場合）
 
 ```bash
 # Gateway 定義の確認
@@ -602,7 +610,7 @@ AWS_PROFILE=nvc-study uv run agentcore add gateway-target \
   --name booking-api-target \
   --gateway booking-api-gateway \
   --type passthrough \
-  --passthrough-endpoint https://aw45ua4i97.execute-api.ap-northeast-1.amazonaws.com/dev \
+  --passthrough-endpoint https://<booking-api-stub-api-gateway-url>/dev \
   --passthrough-protocol MCP \
   --outbound-auth gateway-iam-role \
   --signing-service execute-api \
@@ -618,7 +626,7 @@ AWS_PROFILE=nvc-study uv run agentcore add gateway-target \
 aws s3 mb s3://counseling-demo-data --region ap-northeast-1
 aws s3 mb s3://counseling-demo-athena-results --region ap-northeast-1
 
-# データ投入
+# データ投入 (JSONL形式)
 aws s3 cp backend/data/offices/ s3://counseling-demo-data/offices/ --recursive
 aws s3 cp backend/data/counselors/ s3://counseling-demo-data/counselors/ --recursive
 

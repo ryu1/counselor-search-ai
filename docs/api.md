@@ -19,6 +19,9 @@ API Gateway経由でプロキシLambdaに転送：
 POST https://u420b7ott4.execute-api.ap-northeast-1.amazonaws.com/prod
 ```
 
+> **注意**: このエンドポイントは CloudFormation スタックの出力値から動的に取得してください。
+> CloudFormation スタック `AgentCore-CounselorSearchAI-default` の出力値 `AgentCoreRuntimeInvokeUrl` または AgentCore Runtime の呼び出し URL を使用してください。
+
 ### 2.2 リクエスト
 
 **Headers:**

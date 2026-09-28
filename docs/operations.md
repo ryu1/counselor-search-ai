@@ -306,6 +306,7 @@ aws athena delete-work-group \
 aws s3 rb s3://counseling-demo-data --region ap-northeast-1
 aws s3 rb s3://counseling-demo-athena-results --region ap-northeast-1
 aws s3 rb s3://counselor-search-ai-frontend --region ap-northeast-1
+aws s3 rb s3://counselor-search-ai-zappa-deploy --force --region ap-northeast-1
 
 # ===== 7. IAMインラインポリシー削除 =====
 aws iam delete-role-policy \

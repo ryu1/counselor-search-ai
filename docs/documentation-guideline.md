@@ -10,7 +10,7 @@
 
 ```mermaid
 graph TD
-    CLAUDEMD["🤖 CLAUDE.md<br/>参照ルール（AI が自動読込）"]
+    AGENTSMD["🤖 AGENTS.md<br/>参照ルール（AI が自動読込）"]
     README["📄 README.md<br/>概要・ドキュメント目次"]
     GUIDE["📏 docs/documentation-guideline.md<br/>本ファイル（作成規約）"]
     SPECS["📐 docs/*.md<br/>設計ドキュメント（永続）"]
@@ -18,8 +18,8 @@ graph TD
     PLANS["📋 実装計画<br/>保存先はプラグイン管轄"]
     PROGRESS["📊 進捗管理<br/>保存先はプラグイン管轄"]
 
-    CLAUDEMD -->|参照先を指示| GUIDE
-    CLAUDEMD -->|参照先を指示| SPECS
+    AGENTSMD -->|参照先を指示| GUIDE
+    AGENTSMD -->|参照先を指示| SPECS
     GUIDE -->|規約を定める| SPECS
     GUIDE -->|規約を定める| GLOSSARY
     GUIDE -->|規約を定める| README
