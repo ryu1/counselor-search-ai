@@ -29,23 +29,26 @@
 | Bedrock AgentCore Gateway | MCP Gateway | MCPプロトコル対応・IAM認証統合 |
 
 ### 1.3 開発ツール
- 
- | ツール | 用途 | 理由 |
- |-------|------|------|
- | Python 3.11 | Lambdaランタイム | 高速・型注釈対応・Athena boto3対応 |
- | boto3 | AWS SDK | Lambda内Athena操作 |
- | pytest | テストフレームワーク | Python標準的・フィクスチャ充実 |
- | mypy | 型チェッカー | 静的型検証 |
- | ruff | リンター・フォーマッター | 高速・複数ルール統合 |
- | FastAPI | 予約APIフレームワーク | 高速・ASGI・自動OpenAPI生成 |
- | SQLModel | 予約API ORM | Pydantic統合・SQLAlchemyベース |
- | Zappa | Lambdaデプロイ | FastAPI ASGI対応・簡単デプロイ |
- | pydantic-settings | 設定管理 | 環境変数ベースの設定・バリデーション |
- | python-multipart | フォームデータ解析 | FastAPIでのmultipart/form-data対応 |
- | botocore[crt] | AWS SDK (CRT) | 高速・安定なAWS API通信 |
- | Node.js 20 LTS | フロントエンドビルド | Vite要求バージョン |
- | ESLint | TypeScriptリンター | Vue公式推奨 |
- | Prettier | コードフォーマッター | 統一フォーマット |
+  
+  | ツール | 用途 | 理由 |
+  |-------|------|------|
+  | Python 3.11 | Lambdaランタイム | 高速・型注釈対応・Athena boto3対応 |
+  | boto3 | AWS SDK | Lambda内Athena操作 |
+  | pytest | テストフレームワーク | Python標準的・フィクスチャ充実 |
+  | mypy | 型チェッカー | 静的型検証 |
+  | ruff | リンター・フォーマッター | 高速・複数ルール統合 |
+  | FastAPI | 予約APIフレームワーク | 高速・ASGI・自動OpenAPI生成 |
+  | SQLModel | 予約API ORM | Pydantic統合・SQLAlchemyベース |
+  | Zappa | Lambdaデプロイ | FastAPI ASGI対応・簡単デプロイ |
+  | pydantic-settings | 設定管理 | 環境変数ベースの設定・バリデーション |
+  | python-multipart | フォームデータ解析 | FastAPIでのmultipart/form-data対応 |
+  | botocore[crt] | AWS SDK (CRT) | 高速・安定なAWS API通信 |
+  | strands-agents | Agentフレームワーク | AgentCore Runtime用Agent実装 |
+  | strands-agents-tools | Agent用ツール | 組み込みツール・MCPクライアント |
+  | bedrock-agentcore | AgentCore SDK | AgentCore Runtime連携 |
+  | Node.js 20 LTS | フロントエンドビルド | Vite要求バージョン |
+  | ESLint | TypeScriptリンター | Vue公式推奨 |
+  | Prettier | コードフォーマッター | 統一フォーマット |
 
 ---
 
@@ -199,5 +202,6 @@ dev = [
 
 - **本体 (backend)**: `boto3>=1.35.0,<2.0.0`
 - **本体 (booking-api-stub)**: `fastapi[standard]>=0.110.0`, `uvicorn>=0.29.0`, `sqlmodel>=0.0.22`, `pydantic-settings>=2.3.0`, `python-multipart>=0.0.9`, `botocore[crt]>=1.43.101`
+- **本体 (agent)**: `boto3>=1.28.0`, `strands-agents>=0.1.0`, `strands-agents-tools>=0.1.0`, `bedrock-agentcore>=0.1.0`
 - **開発 (backend)**: `pytest>=8.3.0`, `mypy>=1.11.0`, `ruff>=0.6.0`
 - **開発 (booking-api-stub)**: `pytest>=8.3.0`, `pytest-asyncio>=0.23.0`, `httpx>=0.27.0`, `ruff>=0.6.0`, `pyright>=1.1.0`, `zappa>=0.60.0`
