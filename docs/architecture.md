@@ -187,26 +187,6 @@ AgentCore Memoryを使用して会話を保持します。フロントエンド�
 
 FastAPI標準のバリデーションエラー形式。
 
-**ディレクトリ構成:**
-
-```
-booking-api-stub/
-├── pyproject.toml           # uvプロジェクト設定
-├── uv.lock                  # ロックファイル
-├── zappa_settings.json      # Zappaデプロイ設定
-├── README.md                # 起動・テスト・デプロイ手順
-├── src/booking_api/
-│   ├── __init__.py
-│   ├── main.py              # FastAPIアプリ・エンドポイント
-│   ├── models.py            # SQLModel (テーブル + バリデーション)
-│   └── database.py          # DB接続・セッション管理
-├── tests/
-│   ├── conftest.py          # pytestフィクスチャ
-│   └── test_main.py         # APIエンドポイントテスト
-└── tmp/
-    └── booking.db           # SQLiteデータ（実行時に作成）
-```
-
 **AgentCore Gateway 連携:**
 
 | 項目 | 設定 |
