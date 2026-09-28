@@ -35,6 +35,21 @@ counselor-search-ai/
 │       ├── model/load.py        # モデルローダー
 │       └── pyproject.toml       # Python依存関係
 │
+├── booking-api-stub/            # 予約APIスタブ
+│   ├── pyproject.toml           # uvプロジェクト設定
+│   ├── uv.lock                  # ロックファイル
+│   ├── zappa_settings.json      # Zappaデプロイ設定
+│   ├── src/booking_api/
+│   │   ├── __init__.py
+│   │   ├── main.py              # FastAPIアプリ・エンドポイント
+│   │   ├── models.py            # SQLModel (テーブル + バリデーション)
+│   │   └── database.py          # DB接続・セッション管理
+│   ├── tests/
+│   │   ├── conftest.py          # pytestフィクスチャ
+│   │   └── test_main.py         # APIエンドポイントテスト
+│   └── tmp/
+│       └── booking.db           # SQLiteデータ（実行時に作成）
+│
 ├── frontend/                    # Vue.js フロントエンド
 │   ├── index.html
 │   ├── package.json
@@ -51,7 +66,7 @@ counselor-search-ai/
 │   │   ├── components/
 │   │   │   ├── ChatView.vue
 │   │   │   ├── MessageBubble.vue
-│   │   │   └── InputArea.vue
+│   │   │   ├── InputArea.vue
 │   │   └── stores/
 │   │       └── chat.ts          # Pinia store
 │   └── tests/
@@ -561,26 +576,7 @@ uv run zappa tail dev
 uv run zappa undeploy dev
 ```
 
-### 9.5 予約APIスタブ プロジェクト構成
-
-```
-booking-api-stub/
-├── pyproject.toml           # uvプロジェクト設定
-├── uv.lock                  # ロックファイル
-├── zappa_settings.json      # Zappaデプロイ設定
-├── src/booking_api/
-│   ├── __init__.py
-│   ├── main.py              # FastAPIアプリ・エンドポイント
-│   ├── models.py            # SQLModel (テーブル + バリデーション)
-│   └── database.py          # DB接続・セッション管理
-├── tests/
-│   ├── conftest.py          # pytestフィクスチャ
-│   └── test_main.py         # APIエンドポイントテスト
-└── tmp/
-    └── booking.db           # SQLiteデータ（実行時に作成）
-```
-
-### 9.6 AgentCore Runtime デプロイ
+### 9.5 AgentCore Runtime デプロイ
 
 ```bash
 cd agent
@@ -613,7 +609,7 @@ AWS_PROFILE=nvc-study uv run agentcore add gateway-target \
   --json
 ```
 
-### 9.8 データ層初期セットアップ (Athena/Glue/S3)
+### 9.7 データ層初期セットアップ (Athena/Glue/S3)
 
 初回環境構築時のみ必要。詳細は [lambda-deployment.md](lambda-deployment.md) を参照。
 
@@ -637,7 +633,7 @@ aws athena create-work-group --name counseling-demo-wg --configuration '{
 }'
 ```
 
-### 9.9 デプロイ順序まとめ
+### 9.8 デプロイ順序まとめ
 
 1. **データ層初期セットアップ** (S3/Glue/Athena) - 初回のみ
 2. **booking-api-stub デプロイ** (Zappa) → API Gateway URL 取得
@@ -645,7 +641,7 @@ aws athena create-work-group --name counseling-demo-wg --configuration '{
 4. **AgentCore Gateway 定義** を `agent/agentcore/agentcore.json` に追加
 5. **AgentCore Runtime デプロイ** → Gateway URL が環境変数に注入される
 
-### 9.10 クリーンアップ
+### 9.9 クリーンアップ
 
 ```bash
 # 1. CloudFormation スタック削除（AgentCore Runtime / Gateway / booking-api-stub）
