@@ -420,6 +420,18 @@ bash seed-data.sh
 | `python -m ruff check src/` | リント |
 | `python -m ruff format src/` | フォーマット |
 
+### 予約APIスタブ (booking-api-stub)
+
+| コマンド | 用途 |
+|---------|------|
+| `uv sync --extra dev` | 依存関係インストール |
+| `uv run fastapi dev booking_api/main.py` | 開発サーバー起動 (http://localhost:8000) |
+| `PYTHONPATH=. uv run pytest -v` | テスト実行 |
+| `PYTHONPATH=. uv run pytest -v --cov=booking_api` | カバレッジ付きテスト |
+| `uv run ruff check booking_api/` | リント |
+| `uv run ruff format booking_api/` | フォーマット |
+| `uv run pyright booking_api/` | 型チェック |
+
 ### インフラ
 
 | コマンド | 用途 |
