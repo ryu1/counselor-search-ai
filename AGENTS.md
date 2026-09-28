@@ -20,6 +20,7 @@
 | 要件・仕様の確認 | `docs/product.md`（要件・ユーザーストーリー・成功の定義） |
 | 技術選定・依存ライブラリ | `docs/tech.md` |
 | 用語・命名の確認 | `docs/glossary.md` |
+| **REST API 仕様の確認・追加・変更** | **`docs/api.md`（唯一の正本）** |
 
 複数に該当する場合はすべて読むこと。
 
@@ -49,6 +50,12 @@ Conventional Commits 形式を遵守する。詳細は `docs/conventions.md` を
 - SQL はパラメータ化を使用する（Athena の場合は `escape_sql()` を使用）
 - 個人情報を保存する場合は暗号化する
 - 出力時にエスケープする
+
+### ドキュメント記述ルール
+
+- **REST API 仕様（エンドポイント・リクエスト/レスポンス・エラー・Gateway連携等）は `docs/api.md` のみに記載する**
+- 他のドキュメント（architecture.md, conventions.md, tech.md 等）では API 詳細を記載せず、`docs/api.md` への参照リンクのみを記載する
+- 新規 API 追加・既存 API 変更時は、必ず `docs/api.md` を更新し、同じコミットで反映する
 
 ### 検証
 

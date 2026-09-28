@@ -22,20 +22,22 @@ https://github.com/user-attachments/assets/916acbd0-b1c2-4072-a305-803780a64450
 
 ## 設計ドキュメント
 
-| ドキュメント | 内容 |
-|-------------|------|
-| [product.md](docs/product.md) | プロダクト要件・ユーザーストーリー・機能一覧 |
-| [architecture.md](docs/architecture.md) | システム構成・データモデル・コンポーネント設計 |
-| [design.md](docs/design.md) | GUIデザイン・カラーパレット・コンポーネント仕様 |
-| [api.md](docs/api.md) | API仕様・Tool入出力スキーマ・エラーコード |
-| [tech.md](docs/tech.md) | 技術選定・ライブラリバージョン・パフォーマンス要件 |
-| [conventions.md](docs/conventions.md) | コーディング規約・Git規約・セットアップ手順 |
-| [security.md](docs/security.md) | セキュリティ設計・脅威モデル・IAM設計 |
-| [operations.md](docs/operations.md) | 運用手順・障害対応・クリーンアップ |
-| [review.md](docs/review.md) | レビュー方針・チェックリスト |
-| [glossary.md](docs/glossary.md) | ユビキタス言語・英日対応表 |
-| [lambda-deployment.md](docs/lambda-deployment.md) | Lambdaデプロイ手順（AWS CLI） |
-| [booking-api-stub/README.md](booking-api-stub/README.md) | 予約APIスタブ（FastAPI + SQLModel + Zappa） |
+| ドキュメント | 内容 | 役割 |
+|-------------|------|------|
+| [product.md](docs/product.md) | プロダクト要件・ユーザーストーリー・機能一覧 | 要件定義 |
+| [architecture.md](docs/architecture.md) | システム構成・データモデル・コンポーネント設計 | **設計** |
+| [design.md](docs/design.md) | GUIデザイン・カラーパレット・コンポーネント仕様 | **設計** |
+| [api.md](docs/api.md) | **API仕様・Tool入出力スキーマ・エラーコード** | **正本（唯一のAPI仕様書）** |
+| [tech.md](docs/tech.md) | 技術選定・ライブラリバージョン・パフォーマンス要件 | **技術選定** |
+| [conventions.md](docs/conventions.md) | コーディング規約・Git規約・セットアップ手順・デプロイ手順 | **規約・手順** |
+| [security.md](docs/security.md) | セキュリティ設計・脅威モデル・IAM設計 | **セキュリティ** |
+| [operations.md](docs/operations.md) | 運用手順・障害対応・クリーンアップ | **運用** |
+| [review.md](docs/review.md) | レビュー方針・チェックリスト | **レビュー** |
+| [glossary.md](docs/glossary.md) | ユビキタス言語・英日対応表 | **用語定義** |
+| [lambda-deployment.md](docs/lambda-deployment.md) | Lambdaデプロイ手順（AWS CLI） | **手順書** |
+| [booking-api-stub/README.md](booking-api-stub/README.md) | 予約APIスタブのローカル開発手順 | **手順書** |
+
+> **重要**: REST API の仕様（エンドポイント・リクエスト/レスポンス・エラー・Gateway連携等）は **`docs/api.md` のみ** に記載します。他のドキュメントでは詳細を記載せず、`docs/api.md` への参照リンクのみを記載してください。
 
 ## ライセンス
 

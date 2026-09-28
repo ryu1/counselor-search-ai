@@ -118,9 +118,10 @@ PR作成前に以下を確認:
 ### ドキュメント
 
 - [ ] 対応する設計ドキュメントを更新
-- [ ] API変更時は api.md を更新
+- [ ] API変更時は **api.md を更新**（他ドキュメントに API 詳細を書かない）
 - [ ] データモデル変更時は architecture.md を更新
 - [ ] 新規ツール追加時は conventions.md を更新
+- [ ] **API 仕様が api.md 以外に記載されていないか確認**（architecture.md, conventions.md, tech.md に詳細がないか）
 
 ### テスト
 
