@@ -23,11 +23,19 @@ graph TB
 
         subgraph "AgentCore Runtime"
             Agent[Counselor Search Agent]
-            Bedrock[Amazon Bedrock<br/>Claude 3.5 Sonnet]
+            Bedrock[Amazon Bedrock<br/>Nova Pro / Claude]
         end
 
         subgraph "Search Tool (Lambda)"
-            Lambda[search_counselors<br/>Python 3.11]
+            SearchLambda[search_counselors<br/>Python 3.11]
+        end
+
+        subgraph "Booking API (Lambda)"
+            BookingLambda[booking-api-stub<br/>FastAPI + SQLModel<br/>Python 3.11]
+        end
+
+        subgraph "AgentCore Gateway"
+            Gateway[booking-api-gateway<br/>MCP Protocol]
         end
 
         subgraph "Data Layer"
@@ -43,12 +51,16 @@ graph TB
     API -->|Lambda Proxy| Proxy
     Proxy -->|AgentCore Invoke| Agent
     Agent -->|LLM Call| Bedrock
-    Agent -->|Tool Invoke| Lambda
-    Lambda -->|SQL| Athena
+    Agent -->|Tool Invoke| SearchLambda
+    Agent -->|MCP Call| Gateway
+    Gateway -->|HTTP| BookingLambda
+    SearchLambda -->|SQL| Athena
     Athena -->|Query| Glue
     Athena -->|Read| S3Data
     Athena -->|Write Results| S3Result
-    Lambda -->|Results| Agent
+    SearchLambda -->|Results| Agent
+    BookingLambda -->|Results| Gateway
+    Gateway -->|MCP Response| Agent
     Agent -->|Response| Proxy
     Proxy -->|Response| API
     API -->|Response| UI
@@ -121,7 +133,40 @@ AgentCore Memoryを使用して会話を保持します。フロントエンド�
 | `aggregator.py` | 行データ→オフィス単位集約 | `aggregate_offices()` |
 | `models.py` | データクラス・型定義 | `SearchConditions`, `OfficeResult`, `CounselorMatch` |
 
-### 2.4 データ層
+### 2.4 Booking API（Lambda + AgentCore Gateway）
+
+| モジュール | 責務 | 技術スタック |
+|-----------|------|-------------|
+| `main.py` | FastAPIアプリ・エンドポイント | FastAPI 0.110+ |
+| `models.py` | SQLModel (テーブル + バリデーション) | SQLModel 0.0.22+ |
+| `database.py` | DB接続・セッション管理 | SQLModel + SQLite |
+| `zappa_settings.json` | Zappaデプロイ設定 | Zappa 0.60+ |
+
+**エンドポイント:**
+
+| メソッド | パス | 説明 |
+|---------|------|------|
+| POST | `/bookings` | 予約登録 |
+| GET | `/health` | ヘルスチェック |
+
+**AgentCore Gateway 連携:**
+
+| 項目 | 設定 |
+|------|------|
+| ゲートウェイ名 | `booking-api-gateway` |
+| ターゲット名 | `booking-api-target` |
+| ターゲットタイプ | `passthrough` (MCP Protocol) |
+| エンドポイント | `https://aw45ua4i97.execute-api.ap-northeast-1.amazonaws.com/dev` |
+| プロトコル | MCP |
+| 認証 | GATEWAY_IAM_ROLE (SigV4) |
+
+**MCP Client 実装:**
+
+- Strands公式 `MCPClient` + `streamable_http_client` 使用
+- SigV4署名付き HTTP クライアントで AWS IAM 認証
+- `load_tools()` で自動的に `AgentTool` に変換
+
+### 2.5 データ層
 
 | リソース | 仕様 |
 |---------|------|

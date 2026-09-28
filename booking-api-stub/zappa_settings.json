@@ -1,0 +1,22 @@
+{
+  "dev": {
+    "app_function": "booking_api.main.app",
+    "app_type": "asgi",
+    "s3_bucket": "counselor-search-ai-zappa-deploy",
+    "project_name": "booking-api-stub",
+    "runtime": "python3.11",
+    "region": "ap-northeast-1",
+    "memory_size": 256,
+    "timeout_seconds": 30,
+    "slim_handler": true,
+    "cors_options": {
+      "allowedOrigins": ["*"],
+      "allowedMethods": ["GET", "POST", "OPTIONS"],
+      "allowedHeaders": ["Content-Type", "Authorization"]
+    },
+    "environment_variables": {
+      "DATABASE_URL": "sqlite:///./tmp/booking.db",
+      "ENVIRONMENT": "dev"
+    }
+  }
+}

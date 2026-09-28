@@ -1,39 +1,14 @@
 {
+  "$schema": "https://schema.agentcore.aws.dev/v1/agentcore.json",
   "name": "CounselorSearchAI",
   "version": 1,
-  "runtimes": [
-    {
-      "name": "counselor_search_agent",
-      "description": "Counselor search AI agent",
-      "build": "CodeZip",
-      "entrypoint": "app.py:main",
-      "codeLocation": "app",
-      "runtimeVersion": "PYTHON_3_11",
-      "networkMode": "PUBLIC",
-      "instrumentation": {
-        "enableOtel": false
-      },
-      "envVars": [
-        {
-          "name": "LAMBDA_FUNCTION_NAME",
-          "value": "search_counselors"
-        },
-        {
-          "name": "AGENTCORE_MEMORY_ID",
-          "value": "CounselorSearchAI_session_memory-s7sxexEu5z"
-        }
-      ]
-    }
-  ],
-  "memories": [
-    {
-      "name": "session_memory",
-      "description": "Session memory for conversation history",
-      "type": "SHORT_TERM",
-      "defaultRetentionMinutes": 60,
-      "eventExpiryDuration": 24
-    }
-  ],
+  "managedBy": "CDK",
+  "tags": {
+    "agentcore:created-by": "agentcore-cli",
+    "agentcore:project-name": "CounselorSearchAI"
+  },
+  "runtimes": [],
+  "memories": [],
   "knowledgeBases": [],
   "credentials": [],
   "evaluators": [],
@@ -42,5 +17,7 @@
   "policyEngines": [],
   "configBundles": [],
   "abTests": [],
-  "harnesses": []
+  "harnesses": [],
+  "datasets": [],
+  "payments": []
 }

@@ -525,36 +525,134 @@ npm run build
 aws s3 sync dist s3://counselor-search-ai-frontend --delete
 ```
 
-### 9.4 クリーンアップ
+### 9.4 予約APIスタブ デプロイ (Zappa)
 
 ```bash
-# Lambda 関数削除
-aws lambda delete-function --function-name search_counselors --region ap-northeast-1
-aws lambda delete-function --function-name agentcore-proxy --region ap-northeast-1
+cd booking-api-stub
 
-# IAM ポリシー削除
-aws iam delete-role-policy --role-name lambda_role_himuro --policy-name CounselorSearchPolicy
-aws iam delete-role-policy --role-name lambda_role_himuro --policy-name AgentCoreInvokePolicy
+# 依存関係インストール
+uv sync --extra dev
 
-# API Gateway 削除
-API_ID=$(aws apigateway get-rest-apis --query "items[?name=='CounselorSearchAgentCoreProxy'].id" --output text)
-aws apigateway delete-rest-api --rest-api-id $API_ID
+# S3バケット作成（初回のみ）
+aws s3 mb s3://counselor-search-ai-zappa-deploy --region ap-northeast-1
 
-# S3 ホスティングバケット削除
-aws s3 rm s3://counselor-search-ai-frontend --recursive
-aws s3 rb s3://counselor-search-ai-frontend
+# 初回デプロイ
+uv run zappa deploy dev
 
-# S3 データバケット削除
-aws s3 rm s3://counseling-demo-data --recursive
-aws s3 rm s3://counseling-demo-athena-results --recursive
-aws s3 rb s3://counseling-demo-data
-aws s3 rb s3://counseling-demo-athena-results
+# 更新時
+uv run zappa update dev
 
-# Glue テーブル・データベース削除
-aws glue delete-table --database-name counseling_demo_db --name offices
-aws glue delete-table --database-name counseling_demo_db --name counselors
-aws glue delete-database --name counseling_demo_db
+# ログ確認
+uv run zappa tail dev
 
-# Athena ワークグループ削除
-aws athena delete-work-group --work-group counseling-demo-wg
+# 削除
+uv run zappa undeploy dev
+```
+
+### 9.5 AgentCore Runtime デプロイ
+
+```bash
+cd agent
+
+# 依存関係インストール
+uv sync
+
+# デプロイ（初回・更新共通）
+AWS_PROFILE=nvc-study uv run agentcore deploy -y
+```
+
+### 9.6 AgentCore Gateway デプロイ
+
+Gatewayは `agent/agentcore/agentcore.json` で定義され、AgentCore Runtime デプロイ時に自動作成されます。
+
+```bash
+# Gateway 定義の確認
+cat agent/agentcore/agentcore.json | jq '.agentCoreGateways'
+
+# 手動でゲートウェイターゲットを追加する場合
+cd agent
+AWS_PROFILE=nvc-study uv run agentcore add gateway-target \
+  --name booking-api-target \
+  --gateway booking-api-gateway \
+  --type passthrough \
+  --passthrough-endpoint https://aw45ua4i97.execute-api.ap-northeast-1.amazonaws.com/dev \
+  --passthrough-protocol MCP \
+  --outbound-auth gateway-iam-role \
+  --signing-service execute-api \
+  --json
+```
+
+### 9.7 データ層初期セットアップ (Athena/Glue/S3)
+
+初回環境構築時のみ必要。詳細は [lambda-deployment.md](lambda-deployment.md) を参照。
+
+```bash
+# S3バケット作成
+aws s3 mb s3://counseling-demo-data --region ap-northeast-1
+aws s3 mb s3://counseling-demo-athena-results --region ap-northeast-1
+
+# データ投入
+aws s3 cp backend/data/offices/ s3://counseling-demo-data/offices/ --recursive
+aws s3 cp backend/data/counselors/ s3://counseling-demo-data/counselors/ --recursive
+
+# Glue データベース・テーブル作成
+aws glue create-database --database-input '{"Name": "counseling_demo_db"}'
+# offices/counselors テーブル作成は lambda-deployment.md 参照
+
+# Athena ワークグループ作成
+aws athena create-work-group --name counseling-demo-wg --configuration '{
+  "ResultConfiguration": {"OutputLocation": "s3://counseling-demo-athena-results/query-results/"},
+  "EnforceWorkGroupConfiguration": true
+}'
+```
+
+### 9.8 デプロイ順序まとめ
+
+1. **データ層初期セットアップ** (S3/Glue/Athena) - 初回のみ
+2. **booking-api-stub デプロイ** (Zappa) → API Gateway URL 取得
+3. **検索 Lambda (search_counselors)** デプロイ・IAM権限付与
+4. **AgentCore Gateway 定義** を `agent/agentcore/agentcore.json` に追加
+5. **AgentCore Runtime デプロイ** → Gateway URL が環境変数に注入される
+
+### 9.9 クリーンアップ
+
+```bash
+# 1. CloudFormation スタック削除（AgentCore Runtime / Gateway / booking-api-stub）
+aws cloudformation delete-stack --stack-name AgentCore-CounselorSearchAI-default --region ap-northeast-1 --profile nvc-study
+aws cloudformation delete-stack --stack-name booking-api-stub-dev --region ap-northeast-1 --profile nvc-study
+
+# 完了待ち
+aws cloudformation wait stack-delete-complete --stack-name AgentCore-CounselorSearchAI-default --region ap-northeast-1 --profile nvc-study
+
+# 2. 残存 Lambda 関数削除
+aws lambda delete-function --function-name search_counselors --region ap-northeast-1 --profile nvc-study
+aws lambda delete-function --function-name agentcore-proxy --region ap-northeast-1 --profile nvc-study
+aws lambda delete-function --function-name booking-api-stub-dev --region ap-northeast-1 --profile nvc-study
+
+# 3. IAM ポリシー削除
+aws iam delete-role-policy --role-name lambda_role_himuro --policy-name CounselorSearchPolicy --profile nvc-study
+aws iam delete-role-policy --role-name lambda_role_himuro --policy-name AgentCoreInvokePolicy --profile nvc-study
+
+# 4. API Gateway 削除
+API_ID=$(aws apigateway get-rest-apis --query "items[?name=='CounselorSearchAgentCoreProxy'].id" --output text --profile nvc-study --region ap-northeast-1)
+aws apigateway delete-rest-api --rest-api-id $API_ID --profile nvc-study --region ap-northeast-1
+
+# 5. S3 バケット削除
+aws s3 rm s3://counselor-search-ai-frontend --recursive --profile nvc-study
+aws s3 rb s3://counselor-search-ai-frontend --profile nvc-study
+aws s3 rb s3://counselor-search-ai-zappa-deploy --force --profile nvc-study
+
+# 6. S3 データバケット削除
+aws s3 rm s3://counseling-demo-data --recursive --profile nvc-study
+aws s3 rm s3://counseling-demo-athena-results --recursive --profile nvc-study
+aws s3 rb s3://counseling-demo-data --profile nvc-study
+aws s3 rb s3://counseling-demo-athena-results --profile nvc-study
+
+# 7. Glue テーブル・データベース削除
+aws glue delete-table --database-name counseling_demo_db --name offices --profile nvc-study --region ap-northeast-1
+aws glue delete-table --database-name counseling_demo_db --name counselors --profile nvc-study --region ap-northeast-1
+aws glue delete-database --name counseling_demo_db --profile nvc-study --region ap-northeast-1
+
+# 8. Athena ワークグループ削除
+aws athena delete-work-group --work-group counseling-demo-wg --profile nvc-study --region ap-northeast-1
 ```

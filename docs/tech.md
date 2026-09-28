@@ -19,13 +19,14 @@
 
 | サービス | 用途 | 理由 |
 |---------|------|------|
-| Amazon Bedrock | LLM (Claude 3.5 Sonnet) | 日本語対応・Tool利用対応・マネージド |
+| Amazon Bedrock | LLM (Nova Pro / Claude) | 日本語対応・Tool利用対応・マネージド |
 | Bedrock AgentCore Runtime | AI Agent実行環境 | マネージドAgent基盤・Tool連携簡易 |
-| AWS Lambda | 検索Tool実行 | サーバーレス・コスト効率・自動スケール |
+| AWS Lambda | 検索Tool・予約API実行 | サーバーレス・コスト効率・自動スケール |
 | Amazon Athena | SQL検索エンジン | サーバーレス・S3直結・低コスト |
 | AWS Glue Data Catalog | Athenaテーブル定義 | JSONL対応・スキーマ管理 |
 | Amazon S3 | データ格納・検索結果 | 安定性・低コスト・Athena連携 |
 | CloudFormation | Infrastructure as Code | AWS公式IaC・スタック管理 |
+| Bedrock AgentCore Gateway | MCP Gateway | MCPプロトコル対応・IAM認証統合 |
 
 ### 1.3 開発ツール
 
@@ -36,6 +37,9 @@
 | pytest | テストフレームワーク | Python標準的・フィクスチャ充実 |
 | mypy | 型チェッカー | 静的型検証 |
 | ruff | リンター・フォーマッター | 高速・複数ルール統合 |
+| FastAPI | 予約APIフレームワーク | 高速・ASGI・自動OpenAPI生成 |
+| SQLModel | 予約API ORM | Pydantic統合・SQLAlchemyベース |
+| Zappa | Lambdaデプロイ | FastAPI ASGI対応・簡単デプロイ |
 | Node.js 20 LTS | フロントエンドビルド | Vite要求バージョン |
 | ESLint | TypeScriptリンター | Vue公式推奨 |
 | Prettier | コードフォーマッター | 統一フォーマット |
@@ -55,12 +59,26 @@
 | S3バケット | ACL無効・Block Public Access有効 |
 | Athena WorkGroup | `counseling-demo-wg` |
 | Athenaクエリ結果 | 最大1000行・超える場合はページネーション |
-| Bedrockモデル | `anthropic.claude-3-5-sonnet-20241022-v2:0` |
+| Bedrockモデル (Agent) | `arn:aws:bedrock:ap-northeast-1:334107163417:inference-profile/apac.amazon.nova-pro-v1:0` |
+| Bedrockモデル (Claude 3.5 Sonnet v2) | `arn:aws:bedrock:ap-northeast-1:334107163417:inference-profile/apac.anthropic.claude-3-5-sonnet-20241022-v2:0` |
 | Bedrock最大入力トークン | 200,000 |
 | Bedrock最大出力トークン | 8,192 |
 | Vue.js | 3.4.x+ |
 | Node.js | 20 LTS |
 | TypeScript | 5.x |
+
+### 2.1 予約API (booking-api-stub) 固有の制約
+
+| 要件 | 設定 |
+|------|------|
+| フレームワーク | FastAPI 0.110+ (ASGI) |
+| ORM | SQLModel 0.0.22+ |
+| データベース | SQLite (`tmp/booking.db`) |
+| デプロイ | Zappa 0.60+ (`slim_handler: true`) |
+| ASGI対応 | `app_type: "asgi"` 必須 |
+| パッケージサイズ制限 | 50MB (Zappa制限、`slim_handler`で対応) |
+| API Gatewayタイムアウト | 30秒 |
+| SQLite永続性 | Lambda `/tmp` のみ・冷間起動時に消失可能性あり |
 
 ---
 

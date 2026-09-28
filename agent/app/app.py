@@ -30,6 +30,7 @@ def _load_system_prompt() -> str:
         log.warning(f"System prompt not found at {SYSTEM_PROMPT_PATH}, using fallback")
         return "あなたはカウンセラー検索アシスタントです。search_counselors ツールを使って検索してください。"
 
+
 _lambda_client = None
 
 
@@ -104,6 +105,79 @@ def search_counselors(
         return f"処理中にエラーが発生しました: {str(e)}"
 
 
+def create_mcp_client():
+    """AgentCore Gateway MCP エンドポイントへの MCPClient を作成する（SigV4認証付き）。"""
+    import httpx
+    import botocore.auth
+    import botocore.awsrequest
+    import botocore.session
+    from strands.tools.mcp.mcp_client import MCPClient
+    from mcp.client.streamable_http import streamable_http_client
+
+    # Gateway URL に /mcp を付与して MCP エンドポイントとする
+    base_url = os.environ.get(
+        "BOOKING_GATEWAY_URL",
+        "https://counselorsearchai-booking-api-gateway-rlkzu5smxq.gateway.bedrock-agentcore.ap-northeast-1.amazonaws.com",
+    )
+    mcp_url = f"{base_url.rstrip('/')}/mcp"
+
+    # Create botocore session and signer for SigV4
+    bc_session = botocore.session.get_session()
+    credentials = bc_session.get_credentials()
+    signer = botocore.auth.SigV4Auth(credentials, "bedrock-agentcore", "ap-northeast-1")
+
+    # Create a custom httpx client with SigV4 signing
+    class SigV4Auth(httpx.Auth):
+        def __init__(self, signer):
+            self.signer = signer
+
+        def auth_flow(self, request):
+            aws_request = botocore.awsrequest.AWSRequest(
+                method=request.method,
+                url=str(request.url),
+                headers=dict(request.headers),
+                data=request.content,
+            )
+            self.signer.add_auth(aws_request)
+            request.headers.update(dict(aws_request.headers))
+            yield request
+
+    # Create httpx client with SigV4 auth
+    http_client = httpx.AsyncClient(auth=httpx.BasicAuth("","") if False else SigV4Auth(
+        botocore.auth.SigV4Auth(
+            botocore.session.get_session().get_credentials(),
+            "bedrock-agentcore",
+            "ap-northeast-1"
+        )
+    ), timeout=30.0)
+
+    # Strands の公式 MCPClient を使用（認証付き HTTP クライアントで）
+    return MCPClient(lambda: streamable_http_client(
+        "https://counselorsearchai-booking-api-gateway-rlkzu5smxq.gateway.bedrock-agentcore.ap-northeast-1.amazonaws.com/mcp",
+        http_client=http_client
+    ))
+
+
+async def create_agent_with_mcp_tools(session_manager):
+    """MCP Gateway ツールを含む Agent を作成する。"""
+    mcp_client = create_mcp_client()
+
+    # Strands Agent 用のツールリストを構築
+    tools = [search_counselors]
+
+    # MCP Gateway からツールを自動変換して取得（load_tools は async で AgentTool を返す）
+    mcp_tools = await mcp_client.load_tools()
+    tools.extend(mcp_tools)
+
+    agent = Agent(
+        model=load_model(),
+        system_prompt=_load_system_prompt(),
+        tools=tools,
+        session_manager=session_manager,
+    )
+    return agent
+
+
 def process_prompt(prompt):
     """GenU が送る prompt（ContentBlock 配列）からテキストを抽出する。"""
     if isinstance(prompt, str):
@@ -137,12 +211,7 @@ async def invoke(payload, context):
 
     try:
         with AgentCoreMemorySessionManager(config, region_name="ap-northeast-1") as session_manager:
-            agent = Agent(
-                model=load_model(),
-                system_prompt=_load_system_prompt(),
-                tools=[search_counselors],
-                session_manager=session_manager,
-            )
+            agent = await create_agent_with_mcp_tools(session_manager)
 
             async for event in agent.stream_async(prompt):
                 if "event" in event:

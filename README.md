@@ -35,6 +35,7 @@ https://github.com/user-attachments/assets/916acbd0-b1c2-4072-a305-803780a64450
 | [review.md](docs/review.md) | レビュー方針・チェックリスト |
 | [glossary.md](docs/glossary.md) | ユビキタス言語・英日対応表 |
 | [lambda-deployment.md](docs/lambda-deployment.md) | Lambdaデプロイ手順（AWS CLI） |
+| [booking-api-stub/README.md](booking-api-stub/README.md) | 予約APIスタブ（FastAPI + SQLModel + Zappa） |
 
 ## ライセンス
 

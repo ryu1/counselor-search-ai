@@ -1,0 +1,162 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Counseling Booking API",
+    "description": "カウンセリング予約APIスタブ",
+    "version": "0.1.0"
+  },
+  "servers": [
+    {
+      "url": "https://aw45ua4i97.execute-api.ap-northeast-1.amazonaws.com/dev",
+      "description": "Production API Gateway"
+    }
+  ],
+  "paths": {
+    "/bookings": {
+      "post": {
+        "summary": "予約登録",
+        "description": "カウンセリング予約情報を登録する",
+        "operationId": "createBooking",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BookingCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "予約登録成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BookingResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "バリデーションエラー",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health": {
+      "get": {
+        "summary": "ヘルスチェック",
+        "operationId": "healthCheck",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "ok"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "BookingCreate": {
+        "type": "object",
+        "required": [
+          "name",
+          "email",
+          "booking_datetime",
+          "consultation_content",
+          "counseling_office_name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "description": "予約者名"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "メールアドレス"
+          },
+          "booking_datetime": {
+            "type": "string",
+            "format": "date-time",
+            "description": "予約日時 (ISO 8601)"
+          },
+          "consultation_content": {
+            "type": "string",
+            "minLength": 1,
+            "description": "相談内容"
+          },
+          "counseling_office_name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200,
+            "description": "カウンセリングオフィス名"
+          }
+        }
+      },
+      "BookingResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "自動採番ID"
+          },
+          "name": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "booking_datetime": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "consultation_content": {
+            "type": "string"
+          },
+          "counseling_office_name": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ValidationError": {
+        "type": "object",
+        "properties": {
+          "detail": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          }
+        }
+      }
+    }
+  }
+}
