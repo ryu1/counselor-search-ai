@@ -342,9 +342,96 @@ NextToken=<token>  // ページネーション
 
 ---
 
-## 8. 開発・テスト用モック
+## 8. 予約API (booking-api-stub)
 
-### 8.1 Lambdaローカル実行用イベント例
+予約APIは FastAPI + SQLModel + SQLite + Zappa で実装された REST API です。
+AgentCore Gateway 経由で MCP プロトコルを通じて呼び出されます。
+
+### 8.1 エンドポイント
+
+| メソッド | パス | 説明 |
+|---------|------|------|
+| POST | `/bookings` | 予約登録 |
+| GET | `/health` | ヘルスチェック |
+
+### 8.2 POST /bookings
+
+予約を登録する。
+
+#### リクエストボディ
+
+```json
+{
+  "name": "田中太郎",
+  "email": "tanaka@example.com",
+  "booking_datetime": "2026-10-01T10:00:00",
+  "consultation_content": "仕事のストレスについて相談したい",
+  "counseling_office_name": "東京カウンセリングオフィス"
+}
+```
+
+| フィールド | 型 | 必須 | 説明 |
+|-----------|-----|------|------|
+| name | string | ✓ | 予約者名（1-100文字） |
+| email | string | ✓ | メールアドレス（メール形式） |
+| booking_datetime | string | ✓ | 予約日時（ISO 8601形式） |
+| consultation_content | string | ✓ | 相談内容（1文字以上） |
+| counseling_office_name | string | ✓ | カウンセリングオフィス名（1-200文字） |
+
+#### レスポンス (201 Created)
+
+```json
+{
+  "id": 1,
+  "name": "田中太郎",
+  "email": "tanaka@example.com",
+  "booking_datetime": "2026-10-01T10:00:00",
+  "consultation_content": "仕事のストレスについて相談したい",
+  "counseling_office_name": "東京カウンセリングオフィス",
+  "created_at": "2026-09-24T12:34:56.789012"
+}
+```
+
+| フィールド | 型 | 説明 |
+|-----------|-----|------|
+| id | integer | 自動採番ID |
+| name | string | 予約者名 |
+| email | string | メールアドレス |
+| booking_datetime | string | 予約日時（ISO 8601） |
+| consultation_content | string | 相談内容 |
+| counseling_office_name | string | オフィス名 |
+| created_at | string | 登録日時（ISO 8601） |
+
+#### エラーレスポンス (422 Unprocessable Entity)
+
+FastAPI標準のバリデーションエラー形式で返却される。
+
+### 8.3 AgentCore Gateway 経由での呼び出し
+
+予約APIは AgentCore Gateway を通じて MCP プロトコルで呼び出されます。
+
+**Gateway 設定:**
+
+| 項目 | 設定 |
+|------|------|
+| ゲートウェイ名 | `booking-api-gateway` |
+| ターゲット名 | `booking-api-target` |
+| ターゲットタイプ | `passthrough` (MCP Protocol) |
+| エンドポイント | `https://<booking-api-stub-api-gateway-url>/dev` |
+| プロトコル | MCP |
+| 認証 | GATEWAY_IAM_ROLE (SigV4) |
+
+**MCP Client 実装 (Agent側):**
+
+- Strands公式 `MCPClient` + `streamable_http_client` 使用
+- SigV4署名付き HTTP クライアントで AWS IAM 認証
+- `load_tools()` で自動的に `AgentTool` に変換
+
+---
+
+## 9. 開発・テスト用モック
+
+### 9.1 Lambdaローカル実行用イベント例
 
 ```json
 // test/events/search-valid.json
@@ -364,7 +451,7 @@ NextToken=<token>  // ページネーション
 }
 ```
 
-### 8.2 フロントエンド開発用モックサーバー (MSW)
+### 9.2 フロントエンド開発用モックサーバー (MSW)
 
 ```typescript
 // mocks/handlers.ts
