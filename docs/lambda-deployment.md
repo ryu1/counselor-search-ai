@@ -38,9 +38,11 @@ aws s3 mb s3://counseling-demo-athena-results --region ap-northeast-1
 ```bash
 # オフィスデータ
 aws s3 cp backend/data/offices/office1.json s3://counseling-demo-data/offices/
+aws s3 cp backend/data/offices/office2.json s3://counseling-demo-data/offices/
 
 # カウンセラーデータ
 aws s3 cp backend/data/counselors/counselor1.json s3://counseling-demo-data/counselors/
+aws s3 cp backend/data/counselors/counselor2.json s3://counseling-demo-data/counselors/
 ```
 
 ## 3. Glue データベース・テーブル作成

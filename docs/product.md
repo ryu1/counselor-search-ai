@@ -49,11 +49,11 @@
 
 | 要件 | 内容 |
 |------|------|
-| 対象データ | 1オフィス・1カウンセラー（S3 JSONL） |
+| 対象データ | 14オフィス・カウンセラー多数（S3 JSONL） |
 | 検索対象 | オフィス営業時間ベース（カウンセラー個人の予約枠は非対象） |
 | 公開範囲 | 社内デモ用（認証なし・パブリックアクセス可） |
 | 環境 | 既存AWSアカウント・まっさらな状態・東京リージョン |
-| インフラ | Zappa + 手動CLIでIaC化・デモ終了後スタック削除でクリーンアップ |
+| インフラ | CloudFormationでIaC化・デモ終了後スタック削除でクリーンアップ |
 
 ---
 
@@ -116,13 +116,13 @@
 |----|------|--------|
 | FR-01 | Vue.js製チャットUIでメッセージ送受信 | Must |
 | FR-02 | AgentCore Runtime上でAgent実行 | Must |
-| FR-03 | Bedrock（Amazon Nova Pro）で自然言語理解 | Must |
+| FR-03 | Bedrock（Claude 3.5 Sonnet/Haiku）で自然言語理解 | Must |
 | FR-04 | `search_counselors` Tool実装（Lambda + Athena） | Must |
 | FR-05 | S3 JSONLデータをGlue/Athenaで検索可能にする | Must |
 | FR-06 | 検索条件：stations, area_of_expertise, methods, genders, ages, requested_datetime | Must |
 | FR-07 | 同一項目OR・項目間ANDの検索ロジック | Must |
 | FR-08 | オフィス単位集約・matched_counselors含む結果返却 | Must |
-| FR-09 | Zappa + 手動CLIでIaC化・全リソース管理 | Must |
+| FR-07 | CloudFormationで全リソース管理 | Must |
 
 ### 非機能要件
 
