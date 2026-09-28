@@ -643,43 +643,4 @@ aws athena create-work-group --name counseling-demo-wg --configuration '{
 
 ### 9.9 クリーンアップ
 
-```bash
-# 1. CloudFormation スタック削除（AgentCore Runtime / Gateway / booking-api-stub）
-aws cloudformation delete-stack --stack-name AgentCore-CounselorSearchAI-default --region ap-northeast-1 --profile nvc-study
-aws cloudformation delete-stack --stack-name booking-api-stub-dev --region ap-northeast-1 --profile nvc-study
-
-# 完了待ち
-aws cloudformation wait stack-delete-complete --stack-name AgentCore-CounselorSearchAI-default --region ap-northeast-1 --profile nvc-study
-
-# 2. 残存 Lambda 関数削除
-aws lambda delete-function --function-name search_counselors --region ap-northeast-1 --profile nvc-study
-aws lambda delete-function --function-name agentcore-proxy --region ap-northeast-1 --profile nvc-study
-aws lambda delete-function --function-name booking-api-stub-dev --region ap-northeast-1 --profile nvc-study
-
-# 3. IAM ポリシー削除
-aws iam delete-role-policy --role-name lambda_role_himuro --policy-name CounselorSearchPolicy --profile nvc-study
-aws iam delete-role-policy --role-name lambda_role_himuro --policy-name AgentCoreInvokePolicy --profile nvc-study
-
-# 4. API Gateway 削除
-API_ID=$(aws apigateway get-rest-apis --query "items[?name=='CounselorSearchAgentCoreProxy'].id" --output text --profile nvc-study --region ap-northeast-1)
-aws apigateway delete-rest-api --rest-api-id $API_ID --profile nvc-study --region ap-northeast-1
-
-# 5. S3 バケット削除
-aws s3 rm s3://counselor-search-ai-frontend --recursive --profile nvc-study
-aws s3 rb s3://counselor-search-ai-frontend --profile nvc-study
-aws s3 rb s3://counselor-search-ai-zappa-deploy --force --profile nvc-study
-
-# 6. S3 データバケット削除
-aws s3 rm s3://counseling-demo-data --recursive --profile nvc-study
-aws s3 rm s3://counseling-demo-athena-results --recursive --profile nvc-study
-aws s3 rb s3://counseling-demo-data --profile nvc-study
-aws s3 rb s3://counseling-demo-athena-results --profile nvc-study
-
-# 7. Glue テーブル・データベース削除
-aws glue delete-table --database-name counseling_demo_db --name offices --profile nvc-study --region ap-northeast-1
-aws glue delete-table --database-name counseling_demo_db --name counselors --profile nvc-study --region ap-northeast-1
-aws glue delete-database --name counseling_demo_db --profile nvc-study --region ap-northeast-1
-
-# 8. Athena ワークグループ削除
-aws athena delete-work-group --work-group counseling-demo-wg --profile nvc-study --region ap-northeast-1
-```
+クリーンアップ手順は [operations.md](../operations.md#7-クリーンアップ) を参照してください。
